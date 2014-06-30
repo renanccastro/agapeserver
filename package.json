@@ -1,0 +1,23 @@
+{
+  "name": "agapeserver",
+  "version": "0.0.0",
+  "description": "This is the agape app server",
+  "main": "web.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/renanccastro/agapeserver.git"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/renanccastro/agapeserver/issues"
+  },
+  "homepage": "https://github.com/renanccastro/agapeserver",
+  "dependencies": {
+    "logfmt": "~1.1.2",
+    "express": "~4.4.5"
+  }
+}
