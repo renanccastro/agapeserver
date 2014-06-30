@@ -3,6 +3,7 @@ var express = require("express");
 var logfmt = require("logfmt");
 var app = express();
 var mongo = require('mongodb');
+var crypto = require('crypto');
 
 var mongoUri = process.env.MONGOLAB_URI ||
   process.env.MONGOHQ_URL ||
@@ -11,8 +12,26 @@ var mongoUri = process.env.MONGOLAB_URI ||
 
 app.use(logfmt.requestLogger());
 
-app.get('/', function(req, res) {
-  res.send('Hello World!');
+app.get('/login', function(req, res) {
+   console.log("username: " + req.query.username + " pass: "+ req.query.pass);
+
+   	mongo.Db.connect(mongoUri, function (err, db) {
+	  db.collection('users', function(er, collection) {
+	    collection.findOne({'user': req.query.username}, function(er,rs) {
+	    	//verifica se achou o usuário
+	    	if (rs != null) {
+
+		    	if (passwordHash == req.query.pass) {
+		    		res.send("correto");
+		    	} else{
+		    		res.send("incorreto");
+		    	}
+		    }else{
+		    	res.send("usuário inexistente");
+		    }
+	    });
+	  });
+	});
 });
 
 app.get('/teste', function(req, res){
