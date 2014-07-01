@@ -20,7 +20,7 @@ module.exports.loginAndCreatIfNotExists = function(request, res){
    				});
 
 		    }else{
-		    	createFacebookUser(request);
+		    	createFacebookUser(request, res);
 		    }
 	    });
 	  });
@@ -55,36 +55,7 @@ module.exports.login = function(request, res){
 };
 
 
-module.exports.createFacebookUser = function(request, res){
-   var accesstoken = request.headers.accesstoken;
-
-   var validTokenCallback = function(userInfo){
-
-		   var document = {"_id" : userInfo.facebookuserid,
-		   		"username" : userInfo.username, 
-		   	   "name" : userInfo.name,
-			   "email" : userInfo.email, "gender" : userInfo,
-			   "birthday" : new Date(userInfo.birthday), "denominationID" : request.headers.denominationID,
-			   "state" : request.headers.state, "city" : request.headers.city, "country" : request.headers.country};
-
-		   console.log(document);
-
-		   mongodb.connect( function (err, db) {
-		   		db.collection('users').insert(document, function(err, records) {
-					if (err)
-						throw err;
-					res.send(records[0]._id);
-					console.log("Record added as "+records[0]._id);
-				});
-			});
-
-   	};
-   var failedCallback = function(error){
-
-   };
-   parseUserToken(accesstoken, request, validTokenCallback, failedCallback);
-};
-
+module.exports.createFacebookUser = createFacebookUser;
 
 /*callback({facebookuserid: data.id,
 			username: data.username,
@@ -123,7 +94,7 @@ function parseUserToken(token, postData, callback, failCallback) {
 
 
 //Cria um usuario no facebook
-function createFacebookUser(requestInfo){
+function createFacebookUser(requestInfo, response){
    var accesstoken = requestInfo.headers.accesstoken;
 
    var validTokenCallback = function(userInfo){
@@ -141,7 +112,7 @@ function createFacebookUser(requestInfo){
 		   		db.collection('users').insert(document, function(err, records) {
 					if (err)
 						throw err;
-					res.send(records[0]._id);
+					response.send(records[0]._id);
 					console.log("Record added as "+records[0]._id);
 				});
 			});
