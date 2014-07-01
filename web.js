@@ -25,6 +25,11 @@ app.use(logfmt.requestLogger());
 
 
 app.post('/loginfacebookpost', facebookUser.login);
+app.post('/loginandcreatifnotexistsfacebook', facebookUser.loginAndCreatIfNotExists);
+
+
+app.post('/createfacebookuser', facebookUser.createFacebookUser);
+
 app.post('/loginlocalpost', localUser.login);
 app.post('/createlocaluser', localUser.createLocalUser);
 

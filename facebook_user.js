@@ -2,22 +2,50 @@
 var mongodb = require('./mongo_db.js');
 
 
-module.exports.login = function(request, res){
-   console.log("username: " + request.headers.name + " accessToken: "+ request.headers.accessToken);
-   var accessToken = request.headers.accessToken;
-   var username = request.headers.name;
+module.exports.loginAndCreatIfNotExists = function(request, res){
+   console.log("facebookuserid: " + request.headers.facebookuserid + " accesstoken: "+ request.headers.accesstoken);
+   var accesstoken = request.headers.accesstoken;
+   var facebookuserid = request.headers.facebookuserid;
 
 
    	mongodb.connect(function (err, db) {
 	  db.collection('users', function(er, collection) {
-	    collection.findOne({'username': username}, function(er,rs) {
+	    collection.findOne({'_id': facebookuserid}, function(er,rs) {
 	    	//verifica se achou o usuário
 	    	if (rs != null) {
-		    	if (rs.accessToken == accessToken) {
-		    		res.send("correto");
-		    	} else{
-		    		res.send("incorreto");
-		    	}
+   				parseUserToken(accesstoken, request, function(userInfo){
+   					res.send("correto");
+   				}, function(error){
+   					res.send("errado issae");
+   				});
+
+		    }else{
+		    	createFacebookUser(request);
+		    }
+	    });
+	  });
+	});
+};
+
+
+
+module.exports.login = function(request, res){
+   console.log("facebookuserid: " + request.headers.facebookuserid + " accesstoken: "+ request.headers.accesstoken);
+   var accesstoken = request.headers.accesstoken;
+   var facebookuserid = request.headers.facebookuserid;
+
+
+   	mongodb.connect(function (err, db) {
+	  db.collection('users', function(er, collection) {
+	    collection.findOne({'_id': facebookuserid}, function(er,rs) {
+	    	//verifica se achou o usuário
+	    	if (rs != null) {
+   				parseUserToken(accesstoken, request, function(userInfo){
+   					res.send("correto");
+   				}, function(error){
+   					res.send("errado issae");
+   				});
+
 		    }else{
 		    	res.send("usuário inexistente");
 		    }
@@ -28,13 +56,15 @@ module.exports.login = function(request, res){
 
 
 module.exports.createFacebookUser = function(request, res){
-   var accessToken = res.headers.accessToken;
+   var accesstoken = request.headers.accesstoken;
 
    var validTokenCallback = function(userInfo){
 
-		   var document = {"username" : request.headers.username,
+		   var document = {"_id" : userInfo.facebookuserid,
+		   		"username" : userInfo.username, 
+		   	   "name" : userInfo.name,
 			   "email" : userInfo.email, "gender" : userInfo,
-			   "birthday" : new Date(request.headers.birthday), "denominationID" : request.headers.denominationID,
+			   "birthday" : new Date(userInfo.birthday), "denominationID" : request.headers.denominationID,
 			   "state" : request.headers.state, "city" : request.headers.city, "country" : request.headers.country};
 
 		   console.log(document);
@@ -52,33 +82,33 @@ module.exports.createFacebookUser = function(request, res){
    var failedCallback = function(error){
 
    };
-
-   parseUserToken(accessToken, request, validTokenCallback, failedCallback);
+   parseUserToken(accesstoken, request, validTokenCallback, failedCallback);
 };
 
 
-/*callback({facebookUserId: data.id,
+/*callback({facebookuserid: data.id,
 			username: data.username,
 			firstName: data.first_name,
 			lastName: data.last_name,
 			email: data.email}),
 failCallback({code: response.statusCode, message: data.error.message})*/
-module.exports.parseUserToken = function parseUserToken(token, postData, callback, failCallback) {
+function parseUserToken(token, postData, callback, failCallback) {
+	console.log("token: " + token);
 	var request = require('request');
 	var path = 'https://graph.facebook.com/me?access_token=' + token;
 	request(path, function (error, response, body) {
 		var data = JSON.parse(body);
 	if (!error && response && response.statusCode && response.statusCode == 200) {
 		var user = {
-			facebookUserId: data.id,
+			facebookuserid: data.id,
+			name: data.first_name + " " + data.last_name,
 			username: data.username,
-			firstName: data.first_name,
-			lastName: data.last_name,
-			email: data.email
-
+			email: data.email,
+			gender: data.gender,
+			birthday: data.birthday
 		};
-		if (user.username == postData.headers.username &&
-   			user.email == postData.headers.email) {
+		if (user.facebookuserid == postData.headers.facebookuserid) {
+			   	console.log("deu certo");
 			callback(user);
 		}else{
 			failCallback({code: 404, message: "Usuário não confere com token."});
@@ -90,3 +120,35 @@ module.exports.parseUserToken = function parseUserToken(token, postData, callbac
 	}
 	});
 }
+
+
+//Cria um usuario no facebook
+function createFacebookUser(requestInfo){
+   var accesstoken = requestInfo.headers.accesstoken;
+
+   var validTokenCallback = function(userInfo){
+
+		   var document = {"_id" : userInfo.facebookuserid,
+		   		"username" : userInfo.username, 
+		   	   "name" : userInfo.name,
+			   "email" : userInfo.email, "gender" : userInfo,
+			   "birthday" : new Date(userInfo.birthday), "denominationID" : requestInfo.headers.denominationID,
+			   "state" : requestInfo.headers.state, "city" : requestInfo.headers.city, "country" : requestInfo.headers.country};
+
+		   console.log(document);
+
+		   mongodb.connect( function (err, db) {
+		   		db.collection('users').insert(document, function(err, records) {
+					if (err)
+						throw err;
+					res.send(records[0]._id);
+					console.log("Record added as "+records[0]._id);
+				});
+			});
+
+   	};
+   var failedCallback = function(error){
+
+   };
+   parseUserToken(accesstoken, requestInfo, validTokenCallback, failedCallback);
+};
