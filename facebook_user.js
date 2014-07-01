@@ -131,7 +131,7 @@ function createFacebookUser(requestInfo){
 		   var document = {"_id" : userInfo.facebookuserid,
 		   		"username" : userInfo.username, 
 		   	   "name" : userInfo.name,
-			   "email" : userInfo.email, "gender" : userInfo,
+			   "email" : userInfo.email, "gender" : userInfo.gender,
 			   "birthday" : new Date(userInfo.birthday), "denominationID" : requestInfo.headers.denominationID,
 			   "state" : requestInfo.headers.state, "city" : requestInfo.headers.city, "country" : requestInfo.headers.country};
 
