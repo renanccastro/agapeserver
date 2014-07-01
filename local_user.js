@@ -17,9 +17,28 @@ module.exports.login = function(request, res){
 		    		res.send("incorreto");
 		    	}
 		    }else{
-		    	res.send("usuário inexistente");
+		    	res.send("usuario inexistente");
 		    }
 	    });
 	  });
+	});
+};
+
+module.exports.createLocalUser = function(request, res){
+
+   var document = {"username" : request.headers.username, "password": request.headers.password,
+   				   "email" : request.headers.email, "gender" : request.headers.gender,
+   				   "birthday" : new Date(request.headers.birthday), "denominationID" : request.headers.denominationID,
+   				   "state" : request.headers.state, "city" : request.headers.city, "country" : request.headers.country};
+
+   console.log(document);
+
+   mongodb.connect( function (err, db) {
+   		db.collection('users').insert(document, function(err, records) {
+			if (err)
+				throw err;
+			res.send(recors[0]._id);
+			console.log("Record added as "+records[0]._id);
+		});
 	});
 };
