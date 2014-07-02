@@ -14,7 +14,7 @@ module.exports.loginAndCreatIfNotExists = function(request, res){
 	    	//verifica se achou o usuário
 	    	if (rs != null) {
    				parseUserToken(accesstoken, request, function(userInfo){
-   					var responseJson = {"profile": document, "created_now": "YES"};
+   					var responseJson = {"profile": rs, "created_now": "NO"};
    					res.send(responseJson);
    				}, function(error){
    					res.send("Failed to authenticate.");
