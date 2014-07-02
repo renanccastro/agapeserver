@@ -1,8 +1,8 @@
 var mongodb = require('./mongo_db.js');
 
 module.exports.login = function(request, res){
-	// console.log(request);
-   console.log("username: " + request.body.name + " password: "+ request.body.password);
+	console.log(request.body);
+   console.log("username: " + request.body.username + " password: "+ request.body.password);
    var username = request.body.username;
    var password = request.body.password;
 

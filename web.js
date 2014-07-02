@@ -7,6 +7,8 @@ var crypto = require('crypto');
 var fs = require('fs');
 var facebookUser = require('./facebook_user.js');
 var localUser = require('./local_user.js');
+var bodyParser = require('body-parser');
+
 
 
 // var privateKey = fs.readFileSync('sslcert/privatekey.pem').toString();
@@ -22,7 +24,7 @@ var mongoUri = process.env.MONGOLAB_URI ||
 
 
 app.use(logfmt.requestLogger());
-app.use(express.bodyParser());
+app.use(bodyParser.json());
 
 
 app.post('/loginfacebookpost', facebookUser.login);
