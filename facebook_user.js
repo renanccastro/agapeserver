@@ -3,9 +3,9 @@ var mongodb = require('./mongo_db.js');
 
 
 module.exports.loginAndCreatIfNotExists = function(request, res){
-   console.log("facebookuserid: " + request.headers.facebookuserid + " accesstoken: "+ request.headers.accesstoken);
-   var accesstoken = request.headers.accesstoken;
-   var facebookuserid = request.headers.facebookuserid;
+   console.log("facebookuserid: " + request.body.facebookuserid + " accesstoken: "+ request.body.accesstoken);
+   var accesstoken = request.body.accesstoken;
+   var facebookuserid = request.body.facebookuserid;
 
 
    	mongodb.connect(function (err, db) {
@@ -14,9 +14,10 @@ module.exports.loginAndCreatIfNotExists = function(request, res){
 	    	//verifica se achou o usuário
 	    	if (rs != null) {
    				parseUserToken(accesstoken, request, function(userInfo){
-   					res.send("correto");
+   					var responseJson = {"profile": document, "created_now": "YES"};
+   					res.send(responseJson);
    				}, function(error){
-   					res.send("errado issae");
+   					res.send("Failed to authenticate.");
    				});
 
 		    }else{
@@ -30,9 +31,9 @@ module.exports.loginAndCreatIfNotExists = function(request, res){
 
 
 module.exports.login = function(request, res){
-   console.log("facebookuserid: " + request.headers.facebookuserid + " accesstoken: "+ request.headers.accesstoken);
-   var accesstoken = request.headers.accesstoken;
-   var facebookuserid = request.headers.facebookuserid;
+   console.log("facebookuserid: " + request.body.facebookuserid + " accesstoken: "+ request.body.accesstoken);
+   var accesstoken = request.body.accesstoken;
+   var facebookuserid = request.body.facebookuserid;
 
 
    	mongodb.connect(function (err, db) {
@@ -41,13 +42,14 @@ module.exports.login = function(request, res){
 	    	//verifica se achou o usuário
 	    	if (rs != null) {
    				parseUserToken(accesstoken, request, function(userInfo){
-   					res.send("correto");
+   					var responseJson = {"profile": document, "created_now": "YES"};
+   					res.send(responseJson);
    				}, function(error){
-   					res.send("errado issae");
+   					res.send("Failed to authenticate.");
    				});
 
 		    }else{
-		    	res.send("usuário inexistente");
+		    	res.send("No user Found.");
 		    }
 	    });
 	  });
@@ -78,7 +80,7 @@ function parseUserToken(token, postData, callback, failCallback) {
 			gender: data.gender,
 			birthday: data.birthday
 		};
-		if (user.facebookuserid == postData.headers.facebookuserid) {
+		if (user.facebookuserid == postData.body.facebookuserid) {
 			   	console.log("deu certo");
 			callback(user);
 		}else{
@@ -95,7 +97,7 @@ function parseUserToken(token, postData, callback, failCallback) {
 
 //Cria um usuario no facebook
 function createFacebookUser(requestInfo, response){
-   var accesstoken = requestInfo.headers.accesstoken;
+   var accesstoken = requestInfo.body.accesstoken;
 
    var validTokenCallback = function(userInfo){
 
@@ -103,8 +105,8 @@ function createFacebookUser(requestInfo, response){
 		   		"username" : userInfo.username, 
 		   	   "name" : userInfo.name,
 			   "email" : userInfo.email, "gender" : userInfo.gender,
-			   "birthday" : new Date(userInfo.birthday), "denominationID" : requestInfo.headers.denominationID,
-			   "state" : requestInfo.headers.state, "city" : requestInfo.headers.city, "country" : requestInfo.headers.country};
+			   "birthday" : new Date(userInfo.birthday), "denominationID" : requestInfo.body.denominationID,
+			   "state" : requestInfo.body.state, "city" : requestInfo.body.city, "country" : requestInfo.body.country};
 
 		   console.log(document);
 
@@ -112,7 +114,8 @@ function createFacebookUser(requestInfo, response){
 		   		db.collection('users').insert(document, function(err, records) {
 					if (err)
 						throw err;
-					response.send(records[0]._id);
+					var responseJson = {"profile": document, "created_now": "YES"};
+					response.send(responseJson);
 					console.log("Record added as "+records[0]._id);
 				});
 			});

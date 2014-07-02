@@ -2,9 +2,9 @@ var mongodb = require('./mongo_db.js');
 
 module.exports.login = function(request, res){
 	// console.log(request);
-   console.log("username: " + request.headers.name + " password: "+ request.headers.password);
-   var username = request.headers.username;
-   var password = request.headers.password;
+   console.log("username: " + request.body.name + " password: "+ request.body.password);
+   var username = request.body.username;
+   var password = request.body.password;
 
    	mongodb.connect( function (err, db) {
 	  db.collection('users', function(er, collection) {
@@ -12,12 +12,12 @@ module.exports.login = function(request, res){
 	    	//verifica se achou o usuário
 	    	if (user != null) {
 		    	if (user.password == password) {
-		    		res.send("correto");
+		    		res.send(user);
 		    	} else{
-		    		res.send("incorreto");
+		    		res.send("Failed to authenticate.");
 		    	}
 		    }else{
-		    	res.send("usuario inexistente");
+		    	res.send("No user found.");
 		    }
 	    });
 	  });
@@ -26,10 +26,10 @@ module.exports.login = function(request, res){
 
 module.exports.createLocalUser = function(request, res){
 
-   var document = {"username" : request.headers.username, "password": request.headers.password,
-   				   "name" : request.headers.name, "email" : request.headers.email, "gender" : request.headers.gender,
-   				   "birthday" : new Date(request.headers.birthday), "denominationID" : request.headers.denominationID,
-   				   "state" : request.headers.state, "city" : request.headers.city, "country" : request.headers.country};
+   var document = {"username" : request.body.username, "password": request.body.password,
+   				   "name" : request.body.name, "email" : request.body.email, "gender" : request.body.gender,
+   				   "birthday" : new Date(request.body.birthday), "denominationID" : request.body.denominationID,
+   				   "state" : request.body.state, "city" : request.body.city, "country" : request.body.country};
 
    console.log(document);
 
@@ -37,7 +37,8 @@ module.exports.createLocalUser = function(request, res){
    		db.collection('users').insert(document, function(err, records) {
 			if (err)
 				throw err;
-			res.send(records[0]._id);
+			var responseJson = {"profile": document, "created_now": "YES"};
+			res.send(responseJson);
 			console.log("Record added as "+records[0]._id);
 		});
 	});

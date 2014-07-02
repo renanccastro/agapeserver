@@ -22,6 +22,7 @@ var mongoUri = process.env.MONGOLAB_URI ||
 
 
 app.use(logfmt.requestLogger());
+app.use(express.bodyParser());
 
 
 app.post('/loginfacebookpost', facebookUser.login);
