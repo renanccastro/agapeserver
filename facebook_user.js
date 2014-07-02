@@ -17,7 +17,7 @@ module.exports.loginAndCreatIfNotExists = function(request, res){
    					var responseJson = {"profile": rs, "created_now": "NO"};
    					res.send(responseJson);
    				}, function(error){
-   					res.send("Failed to authenticate.");
+   					res.send("Failed to authenticate!");
    				});
 
 		    }else{
