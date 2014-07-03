@@ -14,6 +14,8 @@ mongodb.connect( function (err, db) {
 
 		//adiciona o verso na carteira do usuario
 		db.collection('users').update({ _.id: records[0].author}, {$set: {verses.unshift(records[0]._id)}});
+		//exemplo:
+		//db.users.update({_id : "472679979502123"}, {$push : { verses: "1234" }} )
 		});
 
 
