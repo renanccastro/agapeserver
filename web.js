@@ -8,7 +8,7 @@ var fs = require('fs');
 var facebookUser = require('./facebook_user.js');
 var localUser = require('./local_user.js');
 var bodyParser = require('body-parser');
-
+var verse = require('./verse.js');
 
 
 // var privateKey = fs.readFileSync('sslcert/privatekey.pem').toString();
@@ -36,6 +36,7 @@ app.post('/createfacebookuser', facebookUser.createFacebookUser);
 app.post('/loginlocalpost', localUser.login);
 app.post('/createlocaluser', localUser.createLocalUser);
 
+app.post('/addverse', verse.addVerse);
 
 app.get('/teste', function(req, res) {
 	mongo.Db.connect(mongoUri, function(err, db) {
