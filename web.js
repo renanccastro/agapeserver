@@ -8,7 +8,6 @@ var fs = require('fs');
 var facebookUser = require('./facebook_user.js');
 var localUser = require('./local_user.js');
 var bodyParser = require('body-parser');
-var server = require('http').createServer(app);
 
 
 
@@ -51,7 +50,7 @@ app.get('/teste', function(req, res) {
 });
 
 var port = Number(process.env.PORT || 5000);
-server.listen(port, function() {
+var server = app.listen(port, function() {
 	console.log("Listening on " + port);
 });
 
