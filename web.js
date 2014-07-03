@@ -10,6 +10,7 @@ var localUser = require('./local_user.js');
 var bodyParser = require('body-parser');
 var verse = require('./verse.js');
 var https = require('https');
+var http = require('http');
 
 
 var privateKey = fs.readFileSync('./sslcert/privatekey.pem');
@@ -20,8 +21,13 @@ var credentials = {
 };
 
 var port = Number(process.env.PORT || 5000);
-var server = https.createServer(credentials, app).listen(port, function() {
+var secureServer = https.createServer(credentials, app).listen(port, function() {
 	console.log("HTTPS Listening on " + port);
+});
+
+var socketsPort = Number(8080);
+var server = http.createServer(app).listen(socketsPort, function() {
+	console.log("Sockets Listening on " + socketsPort);
 });
 
 
