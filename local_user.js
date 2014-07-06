@@ -50,14 +50,15 @@ module.exports.createLocalUser = function(request, res) {
 			}, function(er, user) {
 				//verifica se achou o usuário
 				if (user != null) {
-					response = {"message" : "Usuário já existe", "status": "ok"};
+					response = {"message" : "Usuário já existe", "status": "failed"};
 					res.send(JSON.stringify(response));
 				} else {
 					//insere o usuario
 					db.collection('users').insert(document, function(err, records) {
 						if (err)
 							throw err;
-						res.send(records[0]._id);
+						response = {"message" : records[0]._id, "status": "ok"};
+						res.send(JSON.stringify(response));
 						console.log("Record added as " + records[0]._id);
 					});
 				}
