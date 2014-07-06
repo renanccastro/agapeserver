@@ -14,12 +14,15 @@ module.exports.login = function(request, res) {
 				//verifica se achou o usuário
 				if (user != null) {
 					if (user.password == password) {
-						res.send(user);
+						response = {"message" : user, "status": "ok"};
+						res.send(JSON.stringify(response));
 					} else {
-						res.send("Failed to authenticate.");
+						response = {"message" : "Senha inválida", "status": "failed"};
+						res.send(JSON.stringify(response));
 					}
 				} else {
-					res.send("No user found.");
+					response = {"message" : "Usuário não encontrado", "status": "failed"};
+					res.send(JSON.stringify(response));	
 				}
 			});
 		});
