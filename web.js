@@ -25,18 +25,10 @@ var secureServer = https.createServer(credentials, app).listen(port, function() 
 	console.log("HTTPS Listening on " + port);
 });
 
-var socketsPort = Number(8080);
+var socketsPort = Number(3450);
 var server = http.createServer(app).listen(socketsPort, function() {
 	console.log("Sockets Listening on " + socketsPort);
 });
-
-
-
-
-var mongoUri = process.env.MONGOLAB_URI ||
-	process.env.MONGOHQ_URL ||
-	'mongodb://localhost/mydb';
-
 
 app.use(logfmt.requestLogger());
 app.use(bodyParser.json());
