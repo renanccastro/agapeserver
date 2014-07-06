@@ -1,4 +1,6 @@
 var mongodb = require('./mongo_db.js');
+var jwt = require('jwt-simple');
+require('./config.js');
 
 module.exports.login = function(request, res) {
 	console.log(request.body);
@@ -14,15 +16,14 @@ module.exports.login = function(request, res) {
 				//verifica se achou o usuário
 				if (user != null) {
 					if (user.password == password) {
-						response = {"message" : user, "status": "ok"};
-						res.send(JSON.stringify(response));
+						var token = jwt.encode({userid: user._id}, tokenSecret);
+						res.send({"message" : user, "status": "ok", "token" : token});
 					} else {
-						response = {"message" : "Senha inválida", "status": "failed"};
-						res.send(JSON.stringify(response));
+						console.log("teste"+user.password + request.body.password);
+						res.send({"message" : "Senha inválida", "status": "failed"});
 					}
 				} else {
-					response = {"message" : "Usuário não encontrado", "status": "failed"};
-					res.send(JSON.stringify(response));	
+					res.send({"message" : "Usuário não encontrado", "status": "failed"});	
 				}
 			});
 		});

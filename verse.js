@@ -1,6 +1,14 @@
 var mongodb = require('./mongo_db.js');
+var jwt = require('jwt-simple');
+require('./config.js');
 
 module.exports.addVerse = function(request, res) {
+	var decoded = jwt.decode(request.headers.token, tokenSecret);
+	
+	if(!(decoded.userid == request.body.author) || decoded == null){
+		res.send(403);
+		return;
+	}
 
 	mongodb.connect(function(err, db) {
 

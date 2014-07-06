@@ -1,5 +1,7 @@
 // Make things with facebook user
 var mongodb = require('./mongo_db.js');
+var jwt = require('jwt-simple');
+require('./config.js');
 
 
 module.exports.loginAndCreatIfNotExists = function(request, res){
@@ -10,12 +12,12 @@ module.exports.loginAndCreatIfNotExists = function(request, res){
 
    	mongodb.connect(function (err, db) {
 	  db.collection('users', function(er, collection) {
-	    collection.findOne({'_id': facebookuserid}, function(er,rs) {
+	    collection.findOne({'_id': facebookuserid}, function(er,user) {
 	    	//verifica se achou o usuário
-	    	if (rs != null) {
+	    	if (user != null) {
    				parseUserToken(accesstoken, request, function(userInfo){
-   					var responseJson = {"profile": rs, "created_now": "NO"};
-   					res.send(responseJson);
+					var token = jwt.encode({userid: user._id}, tokenSecret);
+   					res.json({"profile": user, "created_now": "NO", "token" : token});
    				}, function(error){
    					res.send("Failed to authenticate!");
    				});
@@ -38,12 +40,12 @@ module.exports.login = function(request, res){
 
    	mongodb.connect(function (err, db) {
 	  db.collection('users', function(er, collection) {
-	    collection.findOne({'_id': facebookuserid}, function(er,rs) {
+	    collection.findOne({'_id': facebookuserid}, function(er,user) {
 	    	//verifica se achou o usuário
-	    	if (rs != null) {
+	    	if (user != null) {
    				parseUserToken(accesstoken, request, function(userInfo){
-   					var responseJson = {"profile": document, "created_now": "YES"};
-   					res.send(responseJson);
+					var token = jwt.encode({userid: user._id}, tokenSecret);
+   					res.json({"profile": user, "created_now": "YES", "token" : token});
    				}, function(error){
    					res.send("Failed to authenticate.");
    				});
@@ -114,8 +116,9 @@ function createFacebookUser(requestInfo, response){
 		   		db.collection('users').insert(document, function(err, records) {
 					if (err)
 						throw err;
-					var responseJson = {"profile": document, "created_now": "YES"};
-					response.send(responseJson);
+						
+					var token = jwt.encode({userid: records[0]._id}, tokenSecret);
+	   				res.json({"profile": records[0]._id, "created_now": "YES", "token" : token});
 					console.log("Record added as "+records[0]._id);
 				});
 			});

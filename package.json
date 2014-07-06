@@ -19,6 +19,7 @@
   "dependencies": {
     "body-parser": "^1.4.3",
     "express": "~4.4.5",
+    "jwt-simple": "^0.2.0",
     "logfmt": "~1.1.2",
     "mongodb": "~1.4.7",
     "request": "^2.36.0",
