@@ -4,6 +4,26 @@ var jwt = require('jwt-simple');
 require('./config.js');
 
 
+/**
+*	@api {post} /loginandcreatifnotexistsfacebook/ Cria um usuário pelo facebook ou loga se já existir.
+*	@apiName PostLoginAndCreateIfNotExistsFacebook
+*	@apiGroup Login - Facebook
+*
+*	@apiParam {String} accesstoken Facebook accesstoken do usuário.
+*	@apiParam {String} facebookuserid User id do usuário no facebook.
+*
+*	@apiSuccess (Sucesso - 200) {String} profile
+*	@apiSuccess (Sucesso - 200) {String} profile._id id do usuário.
+*	@apiSuccess (Sucesso - 200) {String} profile.name Nome do usuário.
+*	@apiSuccess (Sucesso - 200) {String} profile.email Email do usuário.
+*	@apiSuccess (Sucesso - 200) {String} profile.gender Sexo do usuário.
+*	@apiSuccess (Sucesso - 200) {Date} profile.birthday Data de nascimento do usuário.
+*	@apiSuccess (Sucesso - 200) {String} created_now YES/NO
+*	@apiSuccess (Sucesso - 200) {String} token O token do servidor para ser usado na autenticação
+*
+* 
+*	@apiError (403 - Erro na autenticação) 403 Falha na autenticação do facebook token.
+*/
 module.exports.loginAndCreatIfNotExists = function(request, res){
    console.log("facebookuserid: " + request.body.facebookuserid + " accesstoken: "+ request.body.accesstoken);
    var accesstoken = request.body.accesstoken;
@@ -19,7 +39,7 @@ module.exports.loginAndCreatIfNotExists = function(request, res){
 					var token = jwt.encode({userid: user._id}, tokenSecret);
    					res.json({"profile": user, "created_now": "NO", "token" : token});
    				}, function(error){
-   					res.send("Failed to authenticate!");
+   					res.send(error.code);
    				});
 
 		    }else{
@@ -86,7 +106,7 @@ function parseUserToken(token, postData, callback, failCallback) {
 			   	console.log("deu certo");
 			callback(user);
 		}else{
-			failCallback({code: 404, message: "Usuário não confere com token."});
+			failCallback({code: 403, message: "Usuário não confere com token."});
 		}
 	}
 	else {
@@ -107,8 +127,7 @@ function createFacebookUser(requestInfo, response){
 		   		"username" : userInfo.username, 
 		   	   "name" : userInfo.name,
 			   "email" : userInfo.email, "gender" : userInfo.gender,
-			   "birthday" : new Date(userInfo.birthday), "denominationID" : requestInfo.body.denominationID,
-			   "state" : requestInfo.body.state, "city" : requestInfo.body.city, "country" : requestInfo.body.country};
+			   "birthday" : new Date(userInfo.birthday)};
 
 		   console.log(document);
 

@@ -2,6 +2,46 @@ var mongodb = require('./mongo_db.js');
 var jwt = require('jwt-simple');
 require('./config.js');
 
+
+/**
+ * @apiDefineHeaderStructure TokenHeader
+ * @apiHeader {String} token Token emitido pelo server na hora do login do usuário.
+ * @apiHeader {String} Content-Type application/json.
+ */
+
+/**
+ * @apiDefineErrorStructure NotAuthorized
+ * @apiError (Erro na autenticação) 403 Token não é válido.
+ */
+
+/**
+*	@apiDefineSuccessStructure Verse
+*	@apiSuccess (Sucesso - 200) {String} _id id do versículo.
+*	@apiSuccess (Sucesso - 200) {String} author id do criador do versículo.
+*	@apiSuccess (Sucesso - 200) {Date} CreationDate Data de criação do versículo.
+*	@apiSuccess (Sucesso - 200) {String[]} SharedWith Array de ids de usuários com quais o versículo foi compartilhado.
+*	@apiSuccess (Sucesso - 200) {int} SharedWithLength Tamanho da propriedade anterior.
+*/
+
+/**
+*	@api {post} /addverse/ Cadastrar um versículo
+*	@apiHeaderStructure TokenHeader
+*	@apiName PostAddVerse
+*	@apiGroup Versículos
+*
+*	@apiParam {String} Reference Referência da bíblia, ex: "João 5:23-25".
+*	@apiParam {String} Comment Comentário do versículo.
+*
+*	@apiExample Exemplo de payload para a request:
+*		{
+*			"Reference" : "João 5:23-25",
+*			"Comment"	: "Edificante!"
+*		}
+*
+*	@apiSuccessStructure Verse
+*	@apiErrorStructure NotAuthorized
+*
+*/
 module.exports.addVerse = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
 
@@ -15,7 +55,7 @@ module.exports.addVerse = function(request, res) {
 
 		var verse = request.body;
 		verse.author = userid;
-		verse.CreationDate = Date.now();
+		verse.CreationDate = new Date();
 		verse.SharedWith = [];
 		verse.SharedWithLength = 0;
 
@@ -44,6 +84,20 @@ module.exports.addVerse = function(request, res) {
 	});
 };
 
+
+/**
+*	@api {get} /getverse/ Pegar versículo
+*	@apiHeaderStructure TokenHeader
+*	@apiName PostGetVerse
+*	@apiGroup Versículos
+*
+*	@apiSuccessStructure Verse
+*	@apiErrorStructure NotAuthorized
+*	@apiDescription	Pega um versículo aleatório no banco de versículos utilizando a seguinte estratégia:
+*	>	De todos os versículos que não foi o usuário que criou e que ele ainda não pegou:
+*	   >	Pega os que tem menor SharedWithLength.
+*	   >	Persistindo o empate, pega por CreationDate(menor).
+*/
 module.exports.getRandomVerse = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
 

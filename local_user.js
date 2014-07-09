@@ -2,6 +2,43 @@ var mongodb = require('./mongo_db.js');
 var jwt = require('jwt-simple');
 require('./config.js');
 
+/**
+*	@apiDefineSuccessStructure Profile
+*	@apiSuccess (Sucesso - 200) {String} message
+*	@apiSuccess (Sucesso - 200) {String} message._id id do usuário.
+*	@apiSuccess (Sucesso - 200) {String} message.password SHA1 hash da senha do usuário.
+*	@apiSuccess (Sucesso - 200) {String} message.name Nome do usuário.
+*	@apiSuccess (Sucesso - 200) {String} message.email Email do usuário.
+*	@apiSuccess (Sucesso - 200) {String} message.gender Sexo do usuário.
+*	@apiSuccess (Sucesso - 200) {Date} message.birthday Data de nascimento do usuário.
+*	@apiSuccess (Sucesso - 200) {String} message.denominationID ID da denominação do usuário.
+*	@apiSuccess (Sucesso - 200) {String} message.state Estado(localização) do usuário.
+*	@apiSuccess (Sucesso - 200) {String} message.city Cidade(localização) do usuário.
+*	@apiSuccess (Sucesso - 200) {String} message.country País(localização) do usuário.
+*	@apiSuccess (Sucesso - 200) {String} status ok
+*	@apiSuccess (Sucesso - 200) {String} token O token do servidor para ser usado na autenticação
+*/
+
+
+
+/**
+ * @apiDefineErrorStructure NotAuthorized_v2
+ * @apiError (Erro na autenticação) {String} message Senha inválida/Usuário não encontrado
+ * @apiError (Erro na autenticação) {String} status failed
+ */
+
+/**
+*	@api {post} /loginlocalpost/ Loga um usuário com username e senha
+*	@apiName PostLoginLocalPost
+*	@apiGroup Login - Local
+*
+*	@apiParam {String} username Username do usuário.
+*	@apiParam {String} password SHA1 hash da senha do usuário.
+*
+*	@apiSuccessStructure Profile
+*	@apiErrorStructure NotAuthorized_v2
+*
+*/
 module.exports.login = function(request, res) {
 	console.log(request.body);
 	console.log("username: " + request.body.username + " password: " + request.body.password);
@@ -30,6 +67,33 @@ module.exports.login = function(request, res) {
 	});
 };
 
+
+/**
+*	@api {post} /createlocaluser/ Cria um usuário com o perfil informado.
+*	@apiName PostCreatLocalUser
+*	@apiGroup Login - Local
+*
+*	@apiParam {String} username Username do usuário.
+*	@apiParam {String} password SHA1 hash da senha do usuário.
+*	@apiParam {String} username Username do usuário.
+*	@apiParam {String} password SHA1 hash da senha do usuário.
+*	@apiParam {String} name Nome do usuário.
+*	@apiParam {String} email Email do usuário.
+*	@apiParam {String} gender Sexo do usuário.
+*	@apiParam {String} birthday Data de criação do versículo.
+*	@apiParam {String} denominationID ID da denominação do usuário.
+*	@apiParam {String} state Estado(localização) do usuário.
+*	@apiParam {String} city Cidade(localização) do usuário.
+*	@apiParam {String} country País(localização) do usuário.
+*
+*	@apiSuccess (Sucesso - 200) {String} message
+*	@apiSuccess (Sucesso - 200) {String} message._id id do usuário.
+*	@apiSuccess (Sucesso - 200) {String} status ok
+*
+*
+*	@apiError (Erro na autenticação) {String} message Usuário já existe
+*	@apiError (Erro na autenticação) {String} status failed
+*/
 module.exports.createLocalUser = function(request, res) {
 
 	var document = {
