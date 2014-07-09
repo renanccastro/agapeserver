@@ -44,6 +44,7 @@ app.post('/loginlocalpost', localUser.login);
 app.post('/createlocaluser', localUser.createLocalUser);
 
 app.post('/addverse', verse.addVerse);
+app.get('/getverse', verse.getRandomVerse);
 
 app.get('/teste', function(req, res) {
 	mongo.Db.connect(mongoUri, function(err, db) {

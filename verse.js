@@ -5,7 +5,7 @@ require('./config.js');
 module.exports.addVerse = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
 
-	if (!(decoded.userid == request.body.author) || decoded == null) {
+	if (decoded.userid == null || decoded == null) {
 		res.send(403);
 		return;
 	}
@@ -33,6 +33,11 @@ module.exports.addVerse = function(request, res) {
 				$push: {
 					verses: records[0]._id
 				}
+			}, function(err, record) {
+				if (!err)
+					res.send(200);
+				else
+					res.send(403);
 			});
 
 		});
@@ -50,12 +55,16 @@ module.exports.getRandomVerse = function(request, res) {
 	mongodb.connect(function(err, db) {
 		//Find the verse, and update the fields(SharedWith   and 	SharedWithLenght)
 		db.collection('verses').findAndModify({
+				//acha versículos que não são do usuário e que não foram pegos por ele ainda
 				author: {
 					$ne: userid
+				},
+				SharedWith: {
+					$nin: [userid]
 				}
 			}, [
-				["CreationDate", "asc"],
-				["SharedWithLength", "asc"]
+				["SharedWithLength", "asc"],
+				["CreationDate", "asc"]
 			], {
 				$push: {
 					SharedWith: userid
@@ -64,22 +73,29 @@ module.exports.getRandomVerse = function(request, res) {
 					SharedWithLength: 1
 				}
 			},
-			function(err, records) {
-				if (err) {
-					throw err;
+			//Seta para já vir o documento atualizado
+			{
+				"new": true
+			},
+			function(err, record) {
+				//se não conseguiu achar, retorna 404.
+				if (err || record == null) {
+					res.send(404);
+					return;
 				}
 
-				console.log("Versículo " + records[0]._id);
+				console.log("Versículo " + record);
 
 				//Insert verse (ID) into the user's verses pocket
 				db.collection('users').update({
-					_id: records[0].author
+					_id: record.author
 				}, {
 					$push: {
-						verses: records[0]._id
+						verses: record._id
 					}
+				}, function(err, records) {
+					res.json(record);
 				});
-				res.json(records[0]);
 			});
 	});
 
