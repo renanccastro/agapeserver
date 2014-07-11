@@ -47,7 +47,7 @@ require('./config.js');
 *		}
 *
 *	@apiErrorStructure NotAuthorized
-*	@apiSucessStructure SuccessfulAdded
+*	@apiSuccessStructure SuccessfulAdded
 */
 module.exports.addVerse = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);

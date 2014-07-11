@@ -20,7 +20,7 @@ require('./config.js');
 *		}
 *
 *	@apiErrorStructure NotAuthorized
-*	@apiSucessStructure SuccessfulAdded
+*	@apiSuccessStructure SuccessfulAdded
 *
 */
 module.exports.addPrayRequest = function(request, res) {
