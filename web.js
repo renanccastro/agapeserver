@@ -9,6 +9,7 @@ var facebookUser = require('./facebook_user.js');
 var localUser = require('./local_user.js');
 var bodyParser = require('body-parser');
 var verse = require('./verse.js');
+var prayRequest = require('./pray_request');
 var https = require('https');
 var http = require('http');
 
@@ -45,6 +46,8 @@ app.post('/createlocaluser', localUser.createLocalUser);
 
 app.post('/addverse', verse.addVerse);
 app.get('/getverse', verse.getRandomVerse);
+
+app.post('/addprayrequest', prayRequest.addPrayRequest);
 
 app.get('/teste', function(req, res) {
 	mongo.Db.connect(mongoUri, function(err, db) {

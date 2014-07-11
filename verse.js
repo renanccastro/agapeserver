@@ -12,12 +12,20 @@ require('./config.js');
 /**
  * @apiDefineErrorStructure NotAuthorized
  * @apiError (Erro na autenticação) 403 Token não é válido.
+ * @apiError (Erro no processo) 404 Algo falhou.
  */
+
+
+/**
+ * @apiDefineSuccessStructure SuccessfulAdded
+ * @apiSuccess (Sucesso) 200 Adicionado com sucesso.
+ */
+
 
 /**
 *	@apiDefineSuccessStructure Verse
 *	@apiSuccess (Sucesso - 200) {String} _id id do versículo.
-*	@apiSuccess (Sucesso - 200) {String} author id do criador do versículo.
+*	@apiSuccess (Sucesso - 200) {String} Author id do criador do versículo.
 *	@apiSuccess (Sucesso - 200) {Date} CreationDate Data de criação do versículo.
 *	@apiSuccess (Sucesso - 200) {String[]} SharedWith Array de ids de usuários com quais o versículo foi compartilhado.
 *	@apiSuccess (Sucesso - 200) {int} SharedWithLength Tamanho da propriedade anterior.
@@ -38,9 +46,8 @@ require('./config.js');
 *			"Comment"	: "Edificante!"
 *		}
 *
-*	@apiSuccessStructure Verse
 *	@apiErrorStructure NotAuthorized
-*
+*	@apiSucessStructure SuccessfulAdded
 */
 module.exports.addVerse = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
@@ -54,7 +61,7 @@ module.exports.addVerse = function(request, res) {
 	mongodb.connect(function(err, db) {
 
 		var verse = request.body;
-		verse.author = userid;
+		verse.Author = userid;
 		verse.CreationDate = new Date();
 		verse.SharedWith = [];
 		verse.SharedWithLength = 0;
@@ -68,16 +75,16 @@ module.exports.addVerse = function(request, res) {
 
 			//Insert verse (ID) into the user's verses
 			db.collection('users').update({
-				_id: records[0].author
+				_id: records[0].Author
 			}, {
 				$push: {
-					verses: records[0]._id
+					Verses: records[0]._id
 				}
 			}, function(err, record) {
 				if (!err)
 					res.send(200);
 				else
-					res.send(403);
+					res.send(404);
 			});
 
 		});
@@ -110,7 +117,7 @@ module.exports.getRandomVerse = function(request, res) {
 		//Find the verse, and update the fields(SharedWith   and 	SharedWithLenght)
 		db.collection('verses').findAndModify({
 				//acha versículos que não são do usuário e que não foram pegos por ele ainda
-				author: {
+				Author: {
 					$ne: userid
 				},
 				SharedWith: {
@@ -142,10 +149,10 @@ module.exports.getRandomVerse = function(request, res) {
 
 				//Insert verse (ID) into the user's verses pocket
 				db.collection('users').update({
-					_id: record.author
+					_id: record.Author
 				}, {
 					$push: {
-						verses: record._id
+						Verses: record._id
 					}
 				}, function(err, records) {
 					res.json(record);
