@@ -25,8 +25,10 @@ require('./config.js');
 /**
 *	@apiDefineSuccessStructure Verse
 *	@apiSuccess (Sucesso - 200) {String} _id id do versículo.
+*	@apiSuccess (Sucesso - 200) {String} Comment Comentário.
+*	@apiSuccess (Sucesso - 200) {String} Reference Referência na bíblia.
 *	@apiSuccess (Sucesso - 200) {String} Author id do criador do versículo.
-*	@apiSuccess (Sucesso - 200) {Date} CreationDate Data de criação do versículo.
+*	@apiSuccess (Sucesso - 200) {DateString} CreationDate Data de criação do versículo.
 *	@apiSuccess (Sucesso - 200) {String[]} SharedWith Array de ids de usuários com quais o versículo foi compartilhado.
 *	@apiSuccess (Sucesso - 200) {int} SharedWithLength Tamanho da propriedade anterior.
 */

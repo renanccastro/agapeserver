@@ -2,6 +2,22 @@ var mongodb = require('./mongo_db.js');
 var jwt = require('jwt-simple');
 require('./config.js');
 
+
+
+/**
+*	@apiDefineSuccessStructure Pray
+*	@apiSuccess (Sucesso - 200) {String} _id id do versículo.
+*	@apiSuccess (Sucesso - 200) {String} Description descrição do pedido.
+*	@apiSuccess (Sucesso - 200) {DateString} EstimatedEndDate data estimada de término.
+*	@apiSuccess (Sucesso - 200) {int} Anonymous 0/1 para pedidos anônimos.
+*	@apiSuccess (Sucesso - 200) {String} Author id do criador do versículo.
+*	@apiSuccess (Sucesso - 200) {DateString} CreationDate Data de criação do versículo.
+*	@apiSuccess (Sucesso - 200) {String[]} SharedWith Array de ids de usuários com quais o versículo foi compartilhado.
+*	@apiSuccess (Sucesso - 200) {int} SharedWithLength Tamanho da propriedade anterior.
+*/
+
+
+
 /**
 *	@api {post} /addprayrequest/ Cadastra um pedido de oração
 *	@apiHeaderStructure TokenHeader
@@ -20,7 +36,7 @@ require('./config.js');
 *		}
 *
 *	@apiErrorStructure NotAuthorized
-*	@apiSuccessStructure SuccessfulAdded
+*	@apiSuccessStructure Pray
 *
 */
 module.exports.addPrayRequest = function(request, res) {
@@ -65,3 +81,74 @@ module.exports.addPrayRequest = function(request, res) {
 		});
 	});
 };
+
+
+/**
+*	@api {get} /getprayrequest/ Pegar pedido de oração
+*	@apiHeaderStructure TokenHeader
+*	@apiName GetPrayRequest
+*	@apiGroup Pedidos de oração
+*
+*	@apiSuccessStructure Pray
+*	@apiErrorStructure NotAuthorized
+*	@apiDescription	Pega um pedido aleatório no banco de versículos utilizando a seguinte estratégia:
+*	>	De todos os pedidos que não foi o usuário que criou e que ele ainda não pegou:
+*	   >	Pega os que tem menor SharedWithLength.
+*	   >	Persistindo o empate, pega por CreationDate(menor).
+*/
+module.exports.getRandomPray = function(request, res) {
+	var decoded = jwt.decode(request.headers.token, tokenSecret);
+
+	if (decoded == null || decoded.userid == null) {
+		res.send(403);
+		return;
+	}
+	var userid = decoded.userid;
+	mongodb.connect(function(err, db) {
+		//Find the Pray, and update the fields(SharedWith   and 	SharedWithLenght)
+		db.collection('pray_requests').findAndModify({
+				//acha pedidos que não são do usuário e que não foram pegos por ele ainda
+				Author: {
+					$ne: userid
+				},
+				SharedWith: {
+					$nin: [userid]
+				}
+			}, [
+				["SharedWithLength", "asc"],
+				["CreationDate", "asc"]
+			], {
+				$push: {
+					SharedWith: userid
+				},
+				$inc: {
+					SharedWithLength: 1
+				}
+			},
+			//Seta para já vir o documento atualizado
+			{
+				"new": true
+			},
+			function(err, record) {
+				//se não conseguiu achar, retorna 404.
+				if (err || record == null) {
+					res.send(404);
+					return;
+				}
+
+				console.log("Versículo " + record);
+
+				//Insert Pray (ID) into the user's pray pocket
+				db.collection('users').update({
+					_id: record.Author
+				}, {
+					$push: {
+						PrayRequests: record._id
+					}
+				}, function(err, records) {
+					res.json(record);
+				});
+			});
+	});
+
+}

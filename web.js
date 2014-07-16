@@ -48,6 +48,8 @@ app.post('/addverse', verse.addVerse);
 app.get('/getverse', verse.getRandomVerse);
 
 app.post('/addprayrequest', prayRequest.addPrayRequest);
+app.get('/getprayrequest', prayRequest.getRandomPray);
+
 
 app.get('/teste', function(req, res) {
 	mongo.Db.connect(mongoUri, function(err, db) {
