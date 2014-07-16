@@ -47,7 +47,7 @@ require('./config.js');
 *		}
 *
 *	@apiErrorStructure NotAuthorized
-*	@apiSuccessStructure SuccessfulAdded
+*	@apiSuccessStructure Verse
 */
 module.exports.addVerse = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
@@ -82,7 +82,7 @@ module.exports.addVerse = function(request, res) {
 				}
 			}, function(err, record) {
 				if (!err)
-					res.send(200);
+					res.json(records[0]);
 				else
 					res.send(404);
 			});

@@ -57,7 +57,7 @@ module.exports.addPrayRequest = function(request, res) {
 				}
 			}, function(err, record) {
 				if (!err)
-					res.send(200);
+					res.json(records[0]);
 				else
 					res.send(404);
 			});
