@@ -138,8 +138,10 @@ function createFacebookUser(requestInfo, response){
 
 		 		   mongodb.connect( function (err, db) {
 		 		   		db.collection('users').insert(document, function(err, records) {
-		 					if (err)
+		 					if (err){
+								console.log(err);
 		 						throw err;
+							}
 						
 		 					var token = jwt.encode({userid: records[0]._id}, tokenSecret);
 		 	   				res.json({"profile": records[0]._id, "created_now": "YES", "token" : token});
