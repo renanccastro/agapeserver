@@ -144,7 +144,7 @@ function createFacebookUser(requestInfo, response){
 							}
 						
 		 					var token = jwt.encode({userid: records[0]._id}, tokenSecret);
-		 	   				response.json({"profile": records[0]._id, "created_now": "YES", "token" : token});
+		 	   				response.json({"profile": records[0], "created_now": "YES", "token" : token});
 		 					console.log("Record added as "+records[0]._id);
 		 				});
 		 			});					
