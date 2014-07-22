@@ -19,7 +19,15 @@ module.exports.getProfile = function(request, res) {
 				if(er){
 					res.send(404);
 				}
-				res.json(user);
+				var response;
+				response.name = user.name;
+				response.email = user.email;
+				response.gender = user.gender;
+				response.state = user.state;
+				response.city = user.city;
+				response.photo = user.photo;
+				response.lastModified = user.lastModified;
+				res.json(response);
 			});
 		});
 	});

@@ -106,7 +106,8 @@ module.exports.createLocalUser = function(request, res) {
 		"denominationID": request.body.denominationID,
 		"state": request.body.state,
 		"city": request.body.city,
-		"country": request.body.country
+		"country": request.body.country,
+		"lastModified": new Date()
 	};
 
 	console.log(document);

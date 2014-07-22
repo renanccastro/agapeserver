@@ -90,13 +90,14 @@ failCallback({code: response.statusCode, message: data.error.message})*/
 function parseUserToken(token, postData, callback, failCallback) {
 	console.log("token: " + token);
 	var request = require('request');
-	var path = 'https://graph.facebook.com/me?access_token=' + token;
+	var path = 'https://graph.facebook.com/me?fields=picture,username,name,email,gender,birthday&access_token=' + token;
 	request(path, function (error, response, body) {
 		var data = JSON.parse(body);
 	if (!error && response && response.statusCode && response.statusCode == 200) {
 		var user = {
 			facebookuserid: data.id,
-			name: data.first_name + " " + data.last_name,
+			name: data.name,
+			photo: data.picture.data.url,
 			username: data.username,
 			email: data.email,
 			gender: data.gender,
@@ -127,7 +128,8 @@ function createFacebookUser(requestInfo, response){
 		   		"username" : userInfo.username, 
 		   	   "name" : userInfo.name,
 			   "email" : userInfo.email, "gender" : userInfo.gender,
-			   "birthday" : new Date(userInfo.birthday)};
+			   "birthday" : new Date(userInfo.birthday),
+	   		   "lastModified": new Date()};
 
 		   console.log(document);
 
