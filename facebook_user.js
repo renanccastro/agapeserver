@@ -130,23 +130,50 @@ function createFacebookUser(requestInfo, response){
 			   "email" : userInfo.email, "gender" : userInfo.gender,
 			   "birthday" : new Date(userInfo.birthday),
 	   		   "lastModified": new Date()};
+				
+				
+		
+				var callback = function(image, prefix){
+					document.photo = prefix + image;
+		 		   console.log(document);
 
-		   console.log(document);
-
-		   mongodb.connect( function (err, db) {
-		   		db.collection('users').insert(document, function(err, records) {
-					if (err)
-						throw err;
+		 		   mongodb.connect( function (err, db) {
+		 		   		db.collection('users').insert(document, function(err, records) {
+		 					if (err)
+		 						throw err;
 						
-					var token = jwt.encode({userid: records[0]._id}, tokenSecret);
-	   				res.json({"profile": records[0]._id, "created_now": "YES", "token" : token});
-					console.log("Record added as "+records[0]._id);
-				});
-			});
+		 					var token = jwt.encode({userid: records[0]._id}, tokenSecret);
+		 	   				res.json({"profile": records[0]._id, "created_now": "YES", "token" : token});
+		 					console.log("Record added as "+records[0]._id);
+		 				});
+		 			});					
+				};
+				loadBase64Image(userInfo.photo, callback);
+
 
    	};
    var failedCallback = function(error){
 
    };
    parseUserToken(accesstoken, requestInfo, validTokenCallback, failedCallback);
+};
+
+
+var loadBase64Image = function (url, callback) {
+    // Required 'request' module
+    var request = require('request');
+
+    // Make request to our image url
+    request({url: url, encoding: null}, function (err, res, body) {
+        if (!err && res.statusCode == 200) {
+            // So as encoding set to null then request body became Buffer object
+            var base64prefix = 'data:' + res.headers['content-type'] + ';base64,'
+                , image = body.toString('base64');
+            if (typeof callback == 'function') {
+                callback(image, base64prefix);
+            }
+        } else {
+            throw new Error('Can not download image');
+        }
+    });
 };
