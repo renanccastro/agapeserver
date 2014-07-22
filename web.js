@@ -10,6 +10,7 @@ var localUser = require('./local_user.js');
 var bodyParser = require('body-parser');
 var verse = require('./verse.js');
 var prayRequest = require('./pray_request');
+var profile = require('./profile.js');
 var https = require('https');
 var http = require('http');
 
@@ -50,6 +51,7 @@ app.get('/getverse', verse.getRandomVerse);
 app.post('/addprayrequest', prayRequest.addPrayRequest);
 app.get('/getprayrequest', prayRequest.getRandomPray);
 
+app.get('/profile/:id', profile.getProfile);
 
 app.get('/teste', function(req, res) {
 	mongo.Db.connect(mongoUri, function(err, db) {
