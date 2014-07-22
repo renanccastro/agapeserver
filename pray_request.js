@@ -92,9 +92,9 @@ module.exports.addPrayRequest = function(request, res) {
 *	@apiSuccessStructure Pray
 *	@apiErrorStructure NotAuthorized
 *	@apiDescription	Pega um pedido aleatório no banco de versículos utilizando a seguinte estratégia:
-*	>	De todos os pedidos que não foi o usuário que criou e que ele ainda não pegou:
-*	   >	Pega os que tem menor SharedWithLength.
-*	   >	Persistindo o empate, pega por CreationDate(menor).
+*	De todos os pedidos que não foi o usuário que criou e que ele ainda não pegou:
+*		Pega os que tem menor SharedWithLength.
+*	   	Persistindo o empate, pega por CreationDate(menor).
 */
 module.exports.getRandomPray = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);

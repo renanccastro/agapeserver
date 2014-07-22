@@ -103,9 +103,9 @@ module.exports.addVerse = function(request, res) {
 *	@apiSuccessStructure Verse
 *	@apiErrorStructure NotAuthorized
 *	@apiDescription	Pega um versículo aleatório no banco de versículos utilizando a seguinte estratégia:
-*	>	De todos os versículos que não foi o usuário que criou e que ele ainda não pegou:
-*	   >	Pega os que tem menor SharedWithLength.
-*	   >	Persistindo o empate, pega por CreationDate(menor).
+*	De todos os versículos que não foi o usuário que criou e que ele ainda não pegou:
+*		Pega os que tem menor SharedWithLength.
+*		Persistindo o empate, pega por CreationDate(menor).
 */
 module.exports.getRandomVerse = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
