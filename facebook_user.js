@@ -130,9 +130,10 @@ function createFacebookUser(requestInfo, response){
 	   		   "lastModified": new Date()};
 				
 				
-		
+			   console.log("Antes de chamar");
 				var callback = function(image, prefix){
 					document.photo = prefix + image;
+					console.log("Chamou!");
 		 		   console.log(document);
 
 		 		   mongodb.connect( function (err, db) {
@@ -168,6 +169,7 @@ var loadBase64Image = function (url, callback) {
             var base64prefix = 'data:' + res.headers['content-type'] + ';base64,'
                 , image = body.toString('base64');
             if (typeof callback == 'function') {
+				console.log("Logo antes:");
                 callback(image, base64prefix);
             }
         } else {
