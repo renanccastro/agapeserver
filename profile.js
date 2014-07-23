@@ -21,7 +21,7 @@ module.exports.getProfile = function(request, res) {
 					res.send(404);
 					return;
 				}
-				var response;
+				var response = {};
 				response._id = user._id;
 				response.name = user.name;
 				response.email = user.email;
