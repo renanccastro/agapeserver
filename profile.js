@@ -9,7 +9,7 @@ module.exports.getProfile = function(request, res) {
 		res.send(403);
 		return;
 	}
-	var targetUserId = req.params.id;
+	var targetUserId = request.params.id;
 
 	mongodb.connect(function(err, db) {
 		db.collection('users', function(er, collection) {
@@ -26,6 +26,7 @@ module.exports.getProfile = function(request, res) {
 				response.gender = user.gender;
 				response.state = user.state;
 				response.city = user.city;
+				response.country = user.country;
 				response.photo = user.photo;
 				response.lastModified = user.lastModified;
 				res.json(response);
