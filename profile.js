@@ -9,6 +9,7 @@ module.exports.getProfile = function(request, res) {
 		res.send(403);
 		return;
 	}
+	console.log(request.params.id);
 	var targetUserId = request.params.id;
 
 	mongodb.connect(function(err, db) {
@@ -16,8 +17,9 @@ module.exports.getProfile = function(request, res) {
 			collection.findOne({
 				'_id': targetUserId
 			}, function(er, user) {
-				if(er){
+				if(er || user == null){
 					res.send(404);
+					return;
 				}
 				var response;
 				response._id = user._id;
