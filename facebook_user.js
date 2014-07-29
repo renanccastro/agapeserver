@@ -90,7 +90,7 @@ failCallback({code: response.statusCode, message: data.error.message})*/
 function parseUserToken(token, postData, callback, failCallback) {
 	console.log("token: " + token);
 	var request = require('request');
-	var path = 'https://graph.facebook.com/me?fields=picture,name,email,gender,birthday&access_token=' + token;
+	var path = 'https://graph.facebook.com/me?fields=picture,name,email,gender,birthday,location&access_token=' + token;
 	request(path, function (error, response, body) {
 		var data = JSON.parse(body);
 	if (!error && response && response.statusCode && response.statusCode == 200) {
@@ -100,7 +100,8 @@ function parseUserToken(token, postData, callback, failCallback) {
 			photo: data.picture.data.url,
 			email: data.email,
 			gender: data.gender,
-			birthday: data.birthday
+			birthday: data.birthday,
+			location: data.location
 		};
 		if (user.facebookuserid == postData.body.facebookuserid) {
 			   	console.log("deu certo");
@@ -127,7 +128,8 @@ function createFacebookUser(requestInfo, response){
 		   	   "name" : userInfo.name,
 			   "email" : userInfo.email, "gender" : userInfo.gender,
 			   "birthday" : new Date(userInfo.birthday),
-	   		   "lastModified": new Date()};
+	   		   "lastModified": new Date(),
+		   	   "location" : userInfo.location.name};
 				
 				
 			   console.log("Antes de chamar");
