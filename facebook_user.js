@@ -101,7 +101,7 @@ function parseUserToken(token, postData, callback, failCallback) {
 			email: data.email,
 			gender: data.gender,
 			birthday: data.birthday,
-			location: data.location
+			location: (typeof data.location != 'undefined') ? data.location.name : null
 		};
 		if (user.facebookuserid == postData.body.facebookuserid) {
 			   	console.log("deu certo");
@@ -123,9 +123,11 @@ function createFacebookUser(requestInfo, response){
    var accesstoken = requestInfo.body.accesstoken;
 
    var validTokenCallback = function(userInfo){
-	   var location = userInfo.location.split(", ");
+	   
+	   var location = userInfo.location;
 	   var city, state;
-       if (typeof location[0] != 'undefined'){
+       if (location != null){
+		  location = location.split(", ");
 		  city = location[0];
 		  state = location[1];
        }
