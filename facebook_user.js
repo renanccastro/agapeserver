@@ -123,13 +123,18 @@ function createFacebookUser(requestInfo, response){
    var accesstoken = requestInfo.body.accesstoken;
 
    var validTokenCallback = function(userInfo){
-
+	   var location = userInfo.location.split(", ");
+	   var city, state;
+       if (typeof location[0] != 'undefined'){
+		  city = location[0];
+		  state = location[1];
+       }
 		   var document = {"_id" : userInfo.facebookuserid,
 		   	   "name" : userInfo.name,
 			   "email" : userInfo.email, "gender" : userInfo.gender,
 			   "birthday" : new Date(userInfo.birthday),
 	   		   "lastModified": new Date(),
-		   	   "location" : userInfo.location.name};
+		   	   "city" : city, "state": state};
 				
 				
 			   console.log("Antes de chamar");
