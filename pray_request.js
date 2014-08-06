@@ -149,15 +149,15 @@ module.exports.getRandomPray = function(request, res) {
 					res.json(record);
 				});
 				
+				var notification = {record._id : userid};
 				//Insert pray notification for author
 				db.collection('notifications').update({
 					"userid": record.Author
 				}, {
 					$push: {
-						PrayRequests: record._id
+						PrayRequests: notification
 					}
 				}, function(err, records) {
-					res.json(record);
 				});
 				
 			});

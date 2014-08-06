@@ -161,14 +161,14 @@ module.exports.getRandomVerse = function(request, res) {
 				});
 				
 				//Insert verse notification for author
+				var notification = {record._id : userid};
 				db.collection('notifications').update({
 					"userid": record.Author
 				}, {
 					$push: {
-						Verses: record._id
+						Verses: notification
 					}
 				}, function(err, records) {
-					res.json(record);
 				});
 			});
 	});
