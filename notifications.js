@@ -20,7 +20,7 @@ module.exports.getNotifications = function(request, res){
 					res.send(404);
 					return;
 				}
-				res.send(not);
+				res.json(not);
 				collection.remove({"userid": userid}, function(err, numberOfRemovedDocs){});
 			});
 		});
