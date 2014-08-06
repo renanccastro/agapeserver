@@ -21,7 +21,7 @@ module.exports.getNotifications = function(request, res){
 					return;
 				}
 				res.send(not);
-				collection.remove({"userid": userid});
+				collection.remove({"userid": userid}, function(err, numberOfRemovedDocs){});
 			});
 		});
 	});
