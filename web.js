@@ -11,6 +11,7 @@ var bodyParser = require('body-parser');
 var verse = require('./verse.js');
 var prayRequest = require('./pray_request');
 var profile = require('./profile.js');
+var notifications = require('./notifications.js');
 var https = require('https');
 var http = require('http');
 
@@ -52,6 +53,8 @@ app.post('/addprayrequest', prayRequest.addPrayRequest);
 app.get('/getprayrequest', prayRequest.getRandomPray);
 
 app.get('/profile/:id', profile.getProfile);
+
+app.get('/notifications', notifications.getNotifications);
 
 app.get('/teste', function(req, res) {
 	mongo.Db.connect(mongoUri, function(err, db) {

@@ -148,6 +148,18 @@ module.exports.getRandomPray = function(request, res) {
 				}, function(err, records) {
 					res.json(record);
 				});
+				
+				//Insert pray notification for author
+				db.collection('notifications').update({
+					"userid": record.Author
+				}, {
+					$push: {
+						PrayRequests: record._id
+					}
+				}, function(err, records) {
+					res.json(record);
+				});
+				
 			});
 	});
 
