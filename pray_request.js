@@ -158,7 +158,7 @@ module.exports.getRandomPray = function(request, res) {
 					$push: {
 						PrayRequests: notification
 					}
-				}, function(err, records) {
+				},{ upsert: true }, function(err, records) {
 				});
 				
 			});

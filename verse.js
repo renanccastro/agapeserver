@@ -169,7 +169,7 @@ module.exports.getRandomVerse = function(request, res) {
 					$push: {
 						Verses: notification
 					}
-				}, function(err, records) {
+				},{ upsert: true },function(err, records) {
 				});
 			});
 	});
