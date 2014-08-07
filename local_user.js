@@ -32,7 +32,7 @@ require('./config.js');
 *	@apiName PostLoginLocalPost
 *	@apiGroup Login - Local
 *
-*	@apiParam {String} username Username do usuário.
+*	@apiParam {String} email Email do usuário.
 *	@apiParam {String} password SHA1 hash da senha do usuário.
 *
 *	@apiSuccessStructure Profile
@@ -42,13 +42,13 @@ require('./config.js');
 module.exports.login = function(request, res) {
 	console.log(request.body);
 	console.log("username: " + request.body.username + " password: " + request.body.password);
-	var username = request.body.username;
+	var email = request.body.email;
 	var password = request.body.password;
 
 	mongodb.connect(function(err, db) {
 		db.collection('users', function(er, collection) {
 			collection.findOne({
-				"username": username
+				"email": email
 			}, function(er, user) {
 				//verifica se achou o usuário
 				if (user != null) {
@@ -97,10 +97,9 @@ module.exports.login = function(request, res) {
 module.exports.createLocalUser = function(request, res) {
 
 	var document = {
-		"username": request.body.username,
+		"email": request.body.email,
 		"password": request.body.password,
 		"name": request.body.name,
-		"email": request.body.email,
 		"gender": request.body.gender,
 		"birthday": new Date(request.body.birthday),
 		"denominationID": request.body.denominationID,
