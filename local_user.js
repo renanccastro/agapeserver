@@ -118,7 +118,7 @@ module.exports.createLocalUser = function(request, res) {
 				"username": request.body.username
 			}, function(er, user) {
 				//verifica se achou o usuário
-				if (user != null) {
+				if (user != null || typeof user != "undefined") {
 					response = {"message" : "Usuário já existe", "status": "failed"};
 					res.json(response);
 				} else {
