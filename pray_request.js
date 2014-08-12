@@ -1,5 +1,6 @@
 var mongodb = require('./mongo_db.js');
 var jwt = require('jwt-simple');
+var apn = require('./apn.js');
 require('./config.js');
 
 
@@ -151,15 +152,17 @@ module.exports.getRandomPray = function(request, res) {
 				
 				var notification = {};
 				notification[record._id] = userid;
+				apn.sendNotificationForUser(notification, userid);
+				
 				//Insert pray notification for author
-				db.collection('notifications').update({
-					"userid": record.Author
-				}, {
-					$push: {
-						PrayRequests: notification
-					}
-				},{ upsert: true }, function(err, records) {
-				});
+				// db.collection('notifications').update({
+				// 	"userid": record.Author
+				// }, {
+				// 	$push: {
+				// 		PrayRequests: notification
+				// 	}
+				// },{ upsert: true }, function(err, records) {
+				// });
 				
 			});
 	});

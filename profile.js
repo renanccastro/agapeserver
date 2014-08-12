@@ -36,3 +36,19 @@ module.exports.getProfile = function(request, res) {
 		});
 	});
 }
+module.exports.setDevice = function(request, res){
+	var decoded = jwt.decode(request.headers.token, tokenSecret);
+
+	if (decoded.userid == null || decoded == null) {
+		res.send(403);
+		return;
+	}
+	var userid = decoded.userid;
+	response.
+	
+	mongodb.connect(function(err, db) {
+		db.collection('users', function(er, collection) {
+			collection.update({"_id" : userid} , {$set : {"device" : request.body.device}});
+		});
+	});
+}
