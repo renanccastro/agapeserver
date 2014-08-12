@@ -164,7 +164,7 @@ module.exports.getRandomVerse = function(request, res) {
 				//Insert verse notification for author
 				var notification = {};
 				notification[record._id] = userid;
-				apn.sendNotificationForUser(notification, userid);
+				apn.sendNotificationForUser(notification, record.Author);
 				// db.collection('notifications').update({
 				// 	"userid": record.Author
 				// }, {

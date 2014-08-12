@@ -152,7 +152,7 @@ module.exports.getRandomPray = function(request, res) {
 				
 				var notification = {};
 				notification[record._id] = userid;
-				apn.sendNotificationForUser(notification, userid);
+				apn.sendNotificationForUser(notification, record.Author);
 				
 				//Insert pray notification for author
 				// db.collection('notifications').update({
