@@ -47,7 +47,7 @@ module.exports.setDevice = function(request, res){
 	
 	mongodb.connect(function(err, db) {
 		db.collection('users', function(er, collection) {
-			collection.update({"_id" : userid} , {$set : {"device" : request.body.device}});
+			collection.update({"_id" : userid} , {$set : {"device" : request.body.device}}, function(err,response){if(!err) res.send(200); else res.send(404);});
 		});
 	});
 }
