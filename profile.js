@@ -44,7 +44,6 @@ module.exports.setDevice = function(request, res){
 		return;
 	}
 	var userid = decoded.userid;
-	response.
 	
 	mongodb.connect(function(err, db) {
 		db.collection('users', function(er, collection) {
