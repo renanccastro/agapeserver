@@ -138,7 +138,7 @@ module.exports.getRandomVerse = function(request, res) {
 			], {
 				$push: {
 					SharedWith: userid,
-					GotDate: gotDate,
+					GotDate: gotDate
 				},
 				$inc: {
 					SharedWithLength: 1
