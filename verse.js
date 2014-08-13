@@ -68,6 +68,7 @@ module.exports.addVerse = function(request, res) {
 		verse.CreationDate = new Date();
 		verse.SharedWith = [];
 		verse.SharedWithLength = 0;
+		verse.GotDate = {userid : new Date()};
 
 		//Inserts verse into the collection
 		db.collection('verses').insert(verse, function(err, records) {
@@ -131,7 +132,8 @@ module.exports.getRandomVerse = function(request, res) {
 				["CreationDate", "asc"]
 			], {
 				$push: {
-					SharedWith: userid
+					SharedWith: userid,
+					GotDate: {userid : new Date()}
 				},
 				$inc: {
 					SharedWithLength: 1

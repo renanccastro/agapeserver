@@ -70,7 +70,8 @@ module.exports.addPrayRequest = function(request, res) {
 				_id: records[0].author
 			}, {
 				$push: {
-					PrayRequests: records[0]._id
+					PrayRequests: records[0]._id,
+					GotDate: {userid : new Date()}
 				}
 			}, function(err, record) {
 				if (!err)
@@ -120,7 +121,8 @@ module.exports.getRandomPray = function(request, res) {
 				["CreationDate", "asc"]
 			], {
 				$push: {
-					SharedWith: userid
+					SharedWith: userid,
+					GotDate: {userid : new Date()}
 				},
 				$inc: {
 					SharedWithLength: 1
