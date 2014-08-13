@@ -6,40 +6,40 @@ require('./config.js');
 
 
 /**
-*	@apiDefineSuccessStructure Pray
-*	@apiSuccess (Sucesso - 200) {String} _id id do versículo.
-*	@apiSuccess (Sucesso - 200) {String} Description descrição do pedido.
-*	@apiSuccess (Sucesso - 200) {DateString} EstimatedEndDate data estimada de término.
-*	@apiSuccess (Sucesso - 200) {int} Anonymous 0/1 para pedidos anônimos.
-*	@apiSuccess (Sucesso - 200) {String} Author id do criador do versículo.
-*	@apiSuccess (Sucesso - 200) {DateString} CreationDate Data de criação do versículo.
-*	@apiSuccess (Sucesso - 200) {String[]} SharedWith Array de ids de usuários com quais o versículo foi compartilhado.
-*	@apiSuccess (Sucesso - 200) {int} SharedWithLength Tamanho da propriedade anterior.
-*/
+ *	@apiDefineSuccessStructure Pray
+ *	@apiSuccess (Sucesso - 200) {String} _id id do versículo.
+ *	@apiSuccess (Sucesso - 200) {String} Description descrição do pedido.
+ *	@apiSuccess (Sucesso - 200) {DateString} EstimatedEndDate data estimada de término.
+ *	@apiSuccess (Sucesso - 200) {int} Anonymous 0/1 para pedidos anônimos.
+ *	@apiSuccess (Sucesso - 200) {String} Author id do criador do versículo.
+ *	@apiSuccess (Sucesso - 200) {DateString} CreationDate Data de criação do versículo.
+ *	@apiSuccess (Sucesso - 200) {String[]} SharedWith Array de ids de usuários com quais o versículo foi compartilhado.
+ *	@apiSuccess (Sucesso - 200) {int} SharedWithLength Tamanho da propriedade anterior.
+ */
 
 
 
 /**
-*	@api {post} /addprayrequest/ Cadastra um pedido de oração
-*	@apiHeaderStructure TokenHeader
-*	@apiName PostAddPrayRequest
-*	@apiGroup Pedidos de oração
-*
-*	@apiParam {String} Description Descrição do pedido, ex: Orem pelas provas do Ivan.
-*	@apiParam {DateString} EstimatedEndDate String representando a data estimada de término do pedido no formato ISO 8601.
-*	@apiParam {Integer (0 ou 1)} Anonymous Se o pedido é anônimo ou não.
-*
-*	@apiExample Exemplo de payload para a request de um pedido NÃO ANÔNIMO:
-*		{
-*			"Description"		: "Orem pelas provas do Ivan",
-*			"EstimatedEndDate" : "2004-02-12T15:19:21+00:00",
-*			"Anonymous"	: 0
-*		}
-*
-*	@apiErrorStructure NotAuthorized
-*	@apiSuccessStructure Pray
-*
-*/
+ *	@api {post} /addprayrequest/ Cadastra um pedido de oração
+ *	@apiHeaderStructure TokenHeader
+ *	@apiName PostAddPrayRequest
+ *	@apiGroup Pedidos de oração
+ *
+ *	@apiParam {String} Description Descrição do pedido, ex: Orem pelas provas do Ivan.
+ *	@apiParam {DateString} EstimatedEndDate String representando a data estimada de término do pedido no formato ISO 8601.
+ *	@apiParam {Integer (0 ou 1)} Anonymous Se o pedido é anônimo ou não.
+ *
+ *	@apiExample Exemplo de payload para a request de um pedido NÃO ANÔNIMO:
+ *		{
+ *			"Description"		: "Orem pelas provas do Ivan",
+ *			"EstimatedEndDate" : "2004-02-12T15:19:21+00:00",
+ *			"Anonymous"	: 0
+ *		}
+ *
+ *	@apiErrorStructure NotAuthorized
+ *	@apiSuccessStructure Pray
+ *
+ */
 module.exports.addPrayRequest = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
 
@@ -49,8 +49,8 @@ module.exports.addPrayRequest = function(request, res) {
 	}
 	var userid = decoded.userid;
 	var gotDate = {};
-	gotDate[userid] =	new Date();
-	
+	gotDate[userid] = new Date();
+
 	mongodb.connect(function(err, db) {
 
 		var pray = request.body;
@@ -59,7 +59,7 @@ module.exports.addPrayRequest = function(request, res) {
 		pray.EstimatedEndDate = new Date(request.body.EstimatedEndDate);
 		pray.SharedWith = [];
 		pray.SharedWithLength = 0;
-		pray.GotDate = gotDate;
+		pray.GotDate = [gotDate];
 
 		//Inserts pray into the collection
 		db.collection('pray_requests').insert(pray, function(err, records) {
@@ -88,18 +88,18 @@ module.exports.addPrayRequest = function(request, res) {
 
 
 /**
-*	@api {get} /getprayrequest/ Pegar pedido de oração
-*	@apiHeaderStructure TokenHeader
-*	@apiName GetPrayRequest
-*	@apiGroup Pedidos de oração
-*
-*	@apiSuccessStructure Pray
-*	@apiErrorStructure NotAuthorized
-*	@apiDescription	Pega um pedido aleatório no banco de versículos utilizando a seguinte estratégia:
-*	De todos os pedidos que não foi o usuário que criou e que ele ainda não pegou:
-*		Pega os que tem menor SharedWithLength.
-*	   	Persistindo o empate, pega por CreationDate(menor).
-*/
+ *	@api {get} /getprayrequest/ Pegar pedido de oração
+ *	@apiHeaderStructure TokenHeader
+ *	@apiName GetPrayRequest
+ *	@apiGroup Pedidos de oração
+ *
+ *	@apiSuccessStructure Pray
+ *	@apiErrorStructure NotAuthorized
+ *	@apiDescription	Pega um pedido aleatório no banco de versículos utilizando a seguinte estratégia:
+ *	De todos os pedidos que não foi o usuário que criou e que ele ainda não pegou:
+ *		Pega os que tem menor SharedWithLength.
+ *	   	Persistindo o empate, pega por CreationDate(menor).
+ */
 module.exports.getRandomPray = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
 
@@ -109,7 +109,7 @@ module.exports.getRandomPray = function(request, res) {
 	}
 	var userid = decoded.userid;
 	var gotDate = {};
-	gotDate[userid] =	new Date();
+	gotDate[userid] = new Date();
 	mongodb.connect(function(err, db) {
 		//Find the Pray, and update the fields(SharedWith   and 	SharedWithLenght)
 		db.collection('pray_requests').findAndModify({
@@ -155,11 +155,11 @@ module.exports.getRandomPray = function(request, res) {
 				}, function(err, records) {
 					res.json(record);
 				});
-				
+
 				var notification = {};
 				notification[record._id] = userid;
 				apn.sendNotificationForUser(notification, record.Author);
-				
+
 				//Insert pray notification for author
 				// db.collection('notifications').update({
 				// 	"userid": record.Author
@@ -169,7 +169,7 @@ module.exports.getRandomPray = function(request, res) {
 				// 	}
 				// },{ upsert: true }, function(err, records) {
 				// });
-				
+
 			});
 	});
 

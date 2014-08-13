@@ -1,5 +1,6 @@
 var mongodb = require('./mongo_db.js');
 var jwt = require('jwt-simple');
+var ObjectID = require('mongodb').ObjectID;
 require('./config.js');
 
 module.exports.getProfile = function(request, res) {
@@ -11,11 +12,11 @@ module.exports.getProfile = function(request, res) {
 	}
 	console.log(request.params.id);
 	var targetUserId = request.params.id;
-
+	var objectId = new ObjectID(targetUserId);
 	mongodb.connect(function(err, db) {
 		db.collection('users', function(er, collection) {
 			collection.findOne({
-				'_id': targetUserId
+				$or:[{'_id': targetUserId}, {'_id': objectId}]
 			}, function(er, user) {
 				if(er || user == null){
 					res.send(404);

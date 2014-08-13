@@ -24,34 +24,34 @@ require('./config.js');
 
 
 /**
-*	@apiDefineSuccessStructure Verse
-*	@apiSuccess (Sucesso - 200) {String} _id id do versículo.
-*	@apiSuccess (Sucesso - 200) {String} Comment Comentário.
-*	@apiSuccess (Sucesso - 200) {String} Reference Referência na bíblia.
-*	@apiSuccess (Sucesso - 200) {String} Author id do criador do versículo.
-*	@apiSuccess (Sucesso - 200) {DateString} CreationDate Data de criação do versículo.
-*	@apiSuccess (Sucesso - 200) {String[]} SharedWith Array de ids de usuários com quais o versículo foi compartilhado.
-*	@apiSuccess (Sucesso - 200) {int} SharedWithLength Tamanho da propriedade anterior.
-*/
+ *	@apiDefineSuccessStructure Verse
+ *	@apiSuccess (Sucesso - 200) {String} _id id do versículo.
+ *	@apiSuccess (Sucesso - 200) {String} Comment Comentário.
+ *	@apiSuccess (Sucesso - 200) {String} Reference Referência na bíblia.
+ *	@apiSuccess (Sucesso - 200) {String} Author id do criador do versículo.
+ *	@apiSuccess (Sucesso - 200) {DateString} CreationDate Data de criação do versículo.
+ *	@apiSuccess (Sucesso - 200) {String[]} SharedWith Array de ids de usuários com quais o versículo foi compartilhado.
+ *	@apiSuccess (Sucesso - 200) {int} SharedWithLength Tamanho da propriedade anterior.
+ */
 
 /**
-*	@api {post} /addverse/ Cadastrar um versículo
-*	@apiHeaderStructure TokenHeader
-*	@apiName PostAddVerse
-*	@apiGroup Versículos
-*
-*	@apiParam {String} Reference Referência da bíblia, ex: "João 5:23-25".
-*	@apiParam {String} Comment Comentário do versículo.
-*
-*	@apiExample Exemplo de payload para a request:
-*		{
-*			"Reference" : "João 5:23-25",
-*			"Comment"	: "Edificante!"
-*		}
-*
-*	@apiErrorStructure NotAuthorized
-*	@apiSuccessStructure Verse
-*/
+ *	@api {post} /addverse/ Cadastrar um versículo
+ *	@apiHeaderStructure TokenHeader
+ *	@apiName PostAddVerse
+ *	@apiGroup Versículos
+ *
+ *	@apiParam {String} Reference Referência da bíblia, ex: "João 5:23-25".
+ *	@apiParam {String} Comment Comentário do versículo.
+ *
+ *	@apiExample Exemplo de payload para a request:
+ *		{
+ *			"Reference" : "João 5:23-25",
+ *			"Comment"	: "Edificante!"
+ *		}
+ *
+ *	@apiErrorStructure NotAuthorized
+ *	@apiSuccessStructure Verse
+ */
 module.exports.addVerse = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
 
@@ -61,7 +61,7 @@ module.exports.addVerse = function(request, res) {
 	}
 	var userid = decoded.userid;
 	var gotDate = {};
-	gotDate[userid] =	new Date();
+	gotDate[userid] = new Date();
 
 	mongodb.connect(function(err, db) {
 
@@ -70,7 +70,7 @@ module.exports.addVerse = function(request, res) {
 		verse.CreationDate = new Date();
 		verse.SharedWith = [];
 		verse.SharedWithLength = 0;
-		verse.GotDate = gotDate;
+		verse.GotDate = [gotDate];
 
 		//Inserts verse into the collection
 		db.collection('verses').insert(verse, function(err, records) {
@@ -99,18 +99,18 @@ module.exports.addVerse = function(request, res) {
 
 
 /**
-*	@api {get} /getverse/ Pegar versículo
-*	@apiHeaderStructure TokenHeader
-*	@apiName PostGetVerse
-*	@apiGroup Versículos
-*
-*	@apiSuccessStructure Verse
-*	@apiErrorStructure NotAuthorized
-*	@apiDescription	Pega um versículo aleatório no banco de versículos utilizando a seguinte estratégia:
-*	De todos os versículos que não foi o usuário que criou e que ele ainda não pegou:
-*		Pega os que tem menor SharedWithLength.
-*		Persistindo o empate, pega por CreationDate(menor).
-*/
+ *	@api {get} /getverse/ Pegar versículo
+ *	@apiHeaderStructure TokenHeader
+ *	@apiName PostGetVerse
+ *	@apiGroup Versículos
+ *
+ *	@apiSuccessStructure Verse
+ *	@apiErrorStructure NotAuthorized
+ *	@apiDescription	Pega um versículo aleatório no banco de versículos utilizando a seguinte estratégia:
+ *	De todos os versículos que não foi o usuário que criou e que ele ainda não pegou:
+ *		Pega os que tem menor SharedWithLength.
+ *		Persistindo o empate, pega por CreationDate(menor).
+ */
 module.exports.getRandomVerse = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
 
@@ -120,8 +120,9 @@ module.exports.getRandomVerse = function(request, res) {
 	}
 	var userid = decoded.userid;
 	var gotDate = {};
-	gotDate[userid] =	new Date();
+	gotDate[userid] = new Date();
 	console.log("User id" + userid);
+	console.log(gotDate);
 	mongodb.connect(function(err, db) {
 		//Find the verse, and update the fields(SharedWith   and 	SharedWithLenght)
 		db.collection('verses').findAndModify({
@@ -149,9 +150,10 @@ module.exports.getRandomVerse = function(request, res) {
 				"new": true
 			},
 			function(err, record) {
-					console.log("record" + record);
+				console.log("record" + record);
 				//se não conseguiu achar, retorna 404.
 				if (err || !record) {
+					console.log(err);
 					res.send(404);
 					return;
 				}
@@ -168,7 +170,7 @@ module.exports.getRandomVerse = function(request, res) {
 				}, function(err, records) {
 					res.json(record);
 				});
-				
+
 				//Insert verse notification for author
 				var notification = {};
 				notification[record._id] = userid;
