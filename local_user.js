@@ -41,7 +41,7 @@ require('./config.js');
 */
 module.exports.login = function(request, res) {
 	console.log(request.body);
-	console.log("username: " + request.body.username + " password: " + request.body.password);
+	console.log("email: " + request.body.email + " password: " + request.body.password);
 	var email = request.body.email;
 	var password = request.body.password;
 
@@ -51,7 +51,7 @@ module.exports.login = function(request, res) {
 				"email": email
 			}, function(er, user) {
 				//verifica se achou o usuário
-				if (user != null) {
+				if (user) {
 					if (user.password == password) {
 						var token = jwt.encode({userid: user._id}, tokenSecret);
 						res.send({"message" : user, "status": "ok", "token" : token});
@@ -114,7 +114,7 @@ module.exports.createLocalUser = function(request, res) {
 	mongodb.connect(function(err, db) {
 		db.collection('users', function(er, collection) {
 			collection.findOne({
-				"username": request.body.username
+				"email": request.body.email
 			}, function(er, user) {
 				//verifica se achou o usuário
 				if (user) {
