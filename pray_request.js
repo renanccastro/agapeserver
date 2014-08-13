@@ -48,7 +48,9 @@ module.exports.addPrayRequest = function(request, res) {
 		return;
 	}
 	var userid = decoded.userid;
-
+	var gotDate = {};
+	gotDate[userid] =	new Date();
+	
 	mongodb.connect(function(err, db) {
 
 		var pray = request.body;
@@ -57,7 +59,7 @@ module.exports.addPrayRequest = function(request, res) {
 		pray.EstimatedEndDate = new Date(request.body.EstimatedEndDate);
 		pray.SharedWith = [];
 		pray.SharedWithLength = 0;
-		pray.GotDate = {userid.toString() : new Date()};
+		pray.GotDate = gotDate;
 
 		//Inserts pray into the collection
 		db.collection('pray_requests').insert(pray, function(err, records) {
@@ -106,6 +108,8 @@ module.exports.getRandomPray = function(request, res) {
 		return;
 	}
 	var userid = decoded.userid;
+	var gotDate = {};
+	gotDate[userid] =	new Date();
 	mongodb.connect(function(err, db) {
 		//Find the Pray, and update the fields(SharedWith   and 	SharedWithLenght)
 		db.collection('pray_requests').findAndModify({
@@ -122,7 +126,7 @@ module.exports.getRandomPray = function(request, res) {
 			], {
 				$push: {
 					SharedWith: userid,
-					GotDate: {userid.toString() : new Date()}
+					GotDate: gotDate
 				},
 				$inc: {
 					SharedWithLength: 1

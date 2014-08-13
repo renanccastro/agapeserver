@@ -60,6 +60,8 @@ module.exports.addVerse = function(request, res) {
 		return;
 	}
 	var userid = decoded.userid;
+	var gotDate = {};
+	gotDate[userid] =	new Date();
 
 	mongodb.connect(function(err, db) {
 
@@ -68,7 +70,7 @@ module.exports.addVerse = function(request, res) {
 		verse.CreationDate = new Date();
 		verse.SharedWith = [];
 		verse.SharedWithLength = 0;
-		verse.GotDate = {userid.toString() : new Date()};
+		verse.GotDate = gotDate;
 
 		//Inserts verse into the collection
 		db.collection('verses').insert(verse, function(err, records) {
@@ -117,6 +119,8 @@ module.exports.getRandomVerse = function(request, res) {
 		return;
 	}
 	var userid = decoded.userid;
+	var gotDate = {};
+	gotDate[userid] =	new Date();
 	mongodb.connect(function(err, db) {
 		//Find the verse, and update the fields(SharedWith   and 	SharedWithLenght)
 		db.collection('verses').findAndModify({
@@ -133,7 +137,7 @@ module.exports.getRandomVerse = function(request, res) {
 			], {
 				$push: {
 					SharedWith: userid,
-					GotDate: {userid.toString() : new Date()}
+					GotDate: gotDate,
 				},
 				$inc: {
 					SharedWithLength: 1
