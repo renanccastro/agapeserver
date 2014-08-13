@@ -121,15 +121,16 @@ module.exports.getRandomVerse = function(request, res) {
 	var userid = decoded.userid;
 	var gotDate = {};
 	gotDate[userid] =	new Date();
+	console.log("User id" + userid);
 	mongodb.connect(function(err, db) {
 		//Find the verse, and update the fields(SharedWith   and 	SharedWithLenght)
 		db.collection('verses').findAndModify({
 				//acha versículos que não são do usuário e que não foram pegos por ele ainda
 				Author: {
-					$ne: userid
+					$ne: userid.toString()
 				},
 				SharedWith: {
-					$nin: [userid]
+					$nin: [userid.toString()]
 				}
 			}, [
 				["SharedWithLength", "asc"],
@@ -148,6 +149,7 @@ module.exports.getRandomVerse = function(request, res) {
 				"new": true
 			},
 			function(err, record) {
+					console.log("record" + record);
 				//se não conseguiu achar, retorna 404.
 				if (err || !record) {
 					res.send(404);
