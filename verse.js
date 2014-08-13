@@ -55,7 +55,7 @@ require('./config.js');
 module.exports.addVerse = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
 
-	if (decoded.userid == null || decoded == null) {
+	if (!decoded.userid || !decoded) {
 		res.send(403);
 		return;
 	}
@@ -68,7 +68,7 @@ module.exports.addVerse = function(request, res) {
 		verse.CreationDate = new Date();
 		verse.SharedWith = [];
 		verse.SharedWithLength = 0;
-		verse.GotDate = {userid : new Date()};
+		verse.GotDate = {userid.toString() : new Date()};
 
 		//Inserts verse into the collection
 		db.collection('verses').insert(verse, function(err, records) {
@@ -112,7 +112,7 @@ module.exports.addVerse = function(request, res) {
 module.exports.getRandomVerse = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
 
-	if (decoded == null || decoded.userid == null) {
+	if (!decoded || !decoded.userid) {
 		res.send(403);
 		return;
 	}
@@ -133,7 +133,7 @@ module.exports.getRandomVerse = function(request, res) {
 			], {
 				$push: {
 					SharedWith: userid,
-					GotDate: {userid : new Date()}
+					GotDate: {userid.toString() : new Date()}
 				},
 				$inc: {
 					SharedWithLength: 1
@@ -145,7 +145,7 @@ module.exports.getRandomVerse = function(request, res) {
 			},
 			function(err, record) {
 				//se não conseguiu achar, retorna 404.
-				if (err || record == null) {
+				if (err || !record) {
 					res.send(404);
 					return;
 				}

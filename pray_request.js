@@ -43,7 +43,7 @@ require('./config.js');
 module.exports.addPrayRequest = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
 
-	if (decoded.userid == null || decoded == null) {
+	if (!decoded.userid || !decoded) {
 		res.send(403);
 		return;
 	}
@@ -57,6 +57,7 @@ module.exports.addPrayRequest = function(request, res) {
 		pray.EstimatedEndDate = new Date(request.body.EstimatedEndDate);
 		pray.SharedWith = [];
 		pray.SharedWithLength = 0;
+		pray.GotDate = {userid.toString() : new Date()};
 
 		//Inserts pray into the collection
 		db.collection('pray_requests').insert(pray, function(err, records) {
@@ -70,8 +71,7 @@ module.exports.addPrayRequest = function(request, res) {
 				_id: records[0].author
 			}, {
 				$push: {
-					PrayRequests: records[0]._id,
-					GotDate: {userid : new Date()}
+					PrayRequests: records[0]._id
 				}
 			}, function(err, record) {
 				if (!err)
@@ -101,7 +101,7 @@ module.exports.addPrayRequest = function(request, res) {
 module.exports.getRandomPray = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
 
-	if (decoded == null || decoded.userid == null) {
+	if (!decoded || !decoded.userid) {
 		res.send(403);
 		return;
 	}
@@ -122,7 +122,7 @@ module.exports.getRandomPray = function(request, res) {
 			], {
 				$push: {
 					SharedWith: userid,
-					GotDate: {userid : new Date()}
+					GotDate: {userid.toString() : new Date()}
 				},
 				$inc: {
 					SharedWithLength: 1
@@ -134,7 +134,7 @@ module.exports.getRandomPray = function(request, res) {
 			},
 			function(err, record) {
 				//se não conseguiu achar, retorna 404.
-				if (err || record == null) {
+				if (err || !record) {
 					res.send(404);
 					return;
 				}

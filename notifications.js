@@ -5,7 +5,7 @@ require('./config.js');
 module.exports.getNotifications = function(request, res){
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
 
-	if (decoded.userid == null || decoded == null) {
+	if (!decoded || !decoded.userid) {
 		res.send(403);
 		return;
 	}
