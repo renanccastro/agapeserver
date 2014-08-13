@@ -127,10 +127,10 @@ module.exports.getRandomVerse = function(request, res) {
 		db.collection('verses').findAndModify({
 				//acha versículos que não são do usuário e que não foram pegos por ele ainda
 				Author: {
-					$ne: userid.toString()
+					$ne: userid
 				},
 				SharedWith: {
-					$nin: [userid.toString()]
+					$nin: [userid]
 				}
 			}, [
 				["SharedWithLength", "asc"],
