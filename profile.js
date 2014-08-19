@@ -12,11 +12,19 @@ module.exports.getProfile = function(request, res) {
 	}
 	console.log(request.params.id);
 	var targetUserId = request.params.id;
-	var objectId = new ObjectID(targetUserId);
+	var objectId;
+	try{
+		objectId = new ObjectID(targetUserId);
+		targetUserId = objectId;
+	}
+	catch(err){
+		console.log("Não deu certo o objectId.");
+		targetUserId = request.params.id;
+	}
 	mongodb.connect(function(err, db) {
 		db.collection('users', function(er, collection) {
 			collection.findOne({
-				$or:[{'_id': targetUserId}, {'_id': objectId}]
+				'_id': targetUserId
 			}, function(er, user) {
 				if(er || user == null){
 					res.send(404);
