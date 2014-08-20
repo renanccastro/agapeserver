@@ -4,6 +4,8 @@ var ObjectID = require('mongodb').ObjectID;
 require('./config.js');
 
 module.exports.getProfile = function(request, res) {
+	console.log("token: " + request.headers.token);
+	console.log("secret: " + tokenSecret);
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
 
 	if (!decoded || !decoded.userid) {
