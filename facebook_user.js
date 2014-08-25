@@ -90,7 +90,7 @@ failCallback({code: response.statusCode, message: data.error.message})*/
 function parseUserToken(token, postData, callback, failCallback) {
 	console.log("token: " + token);
 	var request = require('request');
-	var path = 'https://graph.facebook.com/me?fields=picture,name,email,gender,birthday,location&access_token=' + token;
+	var path = 'https://graph.facebook.com/me?fields=picture.type(normal),name,email,gender,birthday,location&access_token=' + token;
 	request(path, function (error, response, body) {
 		var data = JSON.parse(body);
 	if (!error && response && response.statusCode && response.statusCode == 200) {
