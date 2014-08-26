@@ -87,6 +87,39 @@ module.exports.addPrayRequest = function(request, res) {
 };
 
 
+module.exports.newPrays = function(request, res) {
+	var decoded = jwt.decode(request.headers.token, tokenSecret);
+
+	if (!decoded.userid || !decoded) {
+		res.send(403);
+		return;
+	}
+	var userid = decoded.userid;
+	mongodb.connect(function(err, db) {
+		//Find the Pray, and update the fields(SharedWith   and 	SharedWithLenght)
+		db.collection('pray_requests').find({
+				//acha pedidos que não são do usuário e que não foram pegos por ele ainda
+				Author: {
+					$ne: userid
+				},
+				SharedWith: {
+					$nin: [userid]
+				}
+			}, [
+				["SharedWithLength", "asc"],
+				["CreationDate", "asc"]
+			],
+			function(err, records) {
+				//se não conseguiu achar, retorna 404.
+				if (err || !records) {
+					res.send(404);
+					return;
+				}
+				res.send(200);
+			});
+		});
+}
+
 /**
  *	@api {get} /getprayrequest/ Pegar pedido de oração
  *	@apiHeaderStructure TokenHeader

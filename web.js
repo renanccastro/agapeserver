@@ -50,6 +50,7 @@ app.post('/addverse', verse.addVerse);
 app.get('/getverse', verse.getRandomVerse);
 
 app.post('/addprayrequest', prayRequest.addPrayRequest);
+app.get('/newprays', prayRequest.newPrays);
 app.get('/getprayrequest', prayRequest.getRandomPray);
 
 app.get('/profile/:id', profile.getProfile);
