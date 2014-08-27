@@ -111,7 +111,7 @@ module.exports.newPrays = function(request, res) {
 			],
 			function(err, records) {
 				//se não conseguiu achar, retorna 404.
-				if (err || !records) {
+				if (err || !records || !records.length) {
 					res.send(404);
 					return;
 				}
