@@ -113,7 +113,7 @@ module.exports.newPrays = function(request, res) {
 					res.send(404);
 					return;
 				}
-				res.send(200);
+				res.json(record);
 			});
 		});
 }
