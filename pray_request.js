@@ -95,9 +95,10 @@ module.exports.newPrays = function(request, res) {
 		return;
 	}
 	var userid = decoded.userid;
+	console.log(userid);
 	mongodb.connect(function(err, db) {
 		//Find the Pray, and update the fields(SharedWith   and 	SharedWithLenght)
-		db.collection('pray_requests').find({
+		db.collection('pray_requests').findOne({
 				//acha pedidos que não são do usuário e que não foram pegos por ele ainda
 				Author: {
 					$ne: userid
@@ -105,13 +106,10 @@ module.exports.newPrays = function(request, res) {
 				SharedWith: {
 					$nin: [userid]
 				}
-			}, [
-				["SharedWithLength", "asc"],
-				["CreationDate", "asc"]
-			],
-			function(err, records) {
+			},
+			function(err, record) {
 				//se não conseguiu achar, retorna 404.
-				if (err || !records || !records.length) {
+				if (err || !record) {
 					res.send(404);
 					return;
 				}
