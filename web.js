@@ -55,6 +55,7 @@ app.get('/getprayrequest', prayRequest.getRandomPray);
 
 app.get('/profile/:id', profile.getProfile);
 app.post('/profile/device',profile.setDevice);
+app.post('/profile/editprofile',profile.editProfile);
 
 app.get('/notifications', notifications.getNotifications);
 
