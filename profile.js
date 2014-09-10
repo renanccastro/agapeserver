@@ -74,7 +74,7 @@ module.exports.editProfile = function(request, res){
 	
 	mongodb.connect(function(err, db) {
 		db.collection('users', function(er, collection) {
-			collection.update({"_id" : userid} , {$set : variablesToEdit}, function(err,response){if(!err) res.send(200); else res.send(404);});
+			collection.update({"_id" : userid} , {$set : variablesToEdit}, function(err,response){if(!err) res.send(200); else {res.send(404); console.log(err)}});
 		});
 	});
 }
