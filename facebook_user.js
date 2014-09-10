@@ -133,7 +133,7 @@ function createFacebookUser(requestInfo, response){
        }
 		   var document = {"_id" : userInfo.facebookuserid,
 		   	   "name" : userInfo.name,
-			   "email" : userInfo.email, "gender" : userInfo.gender,
+			   "email" : userInfo.email, "gender" : userInfo.gender ? (userInfo.gender == "male" ? "M" : "F") : null,
 			   "birthday" : new Date(userInfo.birthday),
 	   		   "lastModified": new Date(),
 		   	   "city" : city, "state": state};
