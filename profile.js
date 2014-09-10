@@ -15,11 +15,10 @@ module.exports.getProfile = function(request, res) {
 	console.log(request.params.id);
 	var targetUserId = request.params.id;
 	var objectId;
-	try{
+	try {
 		objectId = new ObjectID(targetUserId);
 		targetUserId = objectId;
-	}
-	catch(err){
+	} catch (err) {
 		console.log("Não deu certo o objectId.");
 		targetUserId = request.params.id;
 	}
@@ -28,7 +27,7 @@ module.exports.getProfile = function(request, res) {
 			collection.findOne({
 				'_id': targetUserId
 			}, function(er, user) {
-				if(er || user == null){
+				if (er || user == null) {
 					res.send(404);
 					return;
 				}
@@ -47,7 +46,7 @@ module.exports.getProfile = function(request, res) {
 		});
 	});
 }
-module.exports.setDevice = function(request, res){
+module.exports.setDevice = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
 
 	if (!decoded || !decoded.userid) {
@@ -55,14 +54,23 @@ module.exports.setDevice = function(request, res){
 		return;
 	}
 	var userid = decoded.userid;
-	
+
 	mongodb.connect(function(err, db) {
 		db.collection('users', function(er, collection) {
-			collection.update({"_id" : userid} , {$set : {"device" : request.body.device}}, function(err,response){if(!err) res.send(200); else res.send(404);});
+			collection.update({
+				"_id": userid
+			}, {
+				$set: {
+					"device": request.body.device
+				}
+			}, function(err, response) {
+				if (!err) res.send(200);
+				else res.send(404);
+			});
 		});
 	});
 }
-module.exports.editProfile = function(request, res){
+module.exports.editProfile = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
 
 	if (!decoded || !decoded.userid) {
@@ -71,10 +79,21 @@ module.exports.editProfile = function(request, res){
 	}
 	var userid = decoded.userid;
 	var variablesToEdit = request.body;
-	
+
 	mongodb.connect(function(err, db) {
 		db.collection('users', function(er, collection) {
-			collection.update({"_id" : userid} , {$set : variablesToEdit}, function(err,response){if(!err) res.send(200); else {res.send(404); console.log(err)}});
+			collection.update({
+				"_id": userid
+			}, {
+				$set: variablesToEdit
+			}, function(err, response) {
+				if (!err) {
+					res.send(200);
+				} else {
+					res.send(404);
+					console.log(err);
+				}
+			});
 		});
 	});
 }
