@@ -24,6 +24,7 @@
     "mongodb": "~1.4.7",
     "request": "~2.38.0",
     "socket.io": "0.9.x",
-    "apn": "~1.6.0"
+    "apn": "~1.6.0",
+    "connect-disable-304": "0.0.0"
   }
 }

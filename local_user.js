@@ -11,7 +11,7 @@ require('./config.js');
 *	@apiSuccess (Sucesso - 200) {String} message.email Email do usuário.
 *	@apiSuccess (Sucesso - 200) {String} message.gender Sexo do usuário.
 *	@apiSuccess (Sucesso - 200) {Date} message.birthday Data de nascimento do usuário.
-*	@apiSuccess (Sucesso - 200) {String} message.denominationID ID da denominação do usuário.
+*	@apiSuccess (Sucesso - 200) {String} message.denomination Denominação do usuário.
 *	@apiSuccess (Sucesso - 200) {String} message.state Estado(localização) do usuário.
 *	@apiSuccess (Sucesso - 200) {String} message.city Cidade(localização) do usuário.
 *	@apiSuccess (Sucesso - 200) {String} message.country País(localização) do usuário.
@@ -81,7 +81,7 @@ module.exports.login = function(request, res) {
 *	@apiParam {String} email Email do usuário.
 *	@apiParam {String} gender Sexo do usuário.
 *	@apiParam {String} birthday Data de criação do versículo.
-*	@apiParam {String} denominationID ID da denominação do usuário.
+*	@apiParam {String} denomination denominação do usuário.
 *	@apiParam {String} state Estado(localização) do usuário.
 *	@apiParam {String} city Cidade(localização) do usuário.
 *	@apiParam {String} country País(localização) do usuário.
@@ -102,7 +102,7 @@ module.exports.createLocalUser = function(request, res) {
 		"name": request.body.name,
 		"gender": request.body.gender,
 		"birthday": new Date(request.body.birthday),
-		"denominationID": request.body.denominationID,
+		"denomination": request.body.denomination,
 		"state": request.body.state,
 		"city": request.body.city,
 		"country": request.body.country,

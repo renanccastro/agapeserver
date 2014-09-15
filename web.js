@@ -14,6 +14,7 @@ var profile = require('./profile.js');
 var notifications = require('./notifications.js');
 var https = require('https');
 var http = require('http');
+var disable304 = require('connect-disable-304');
 
 
 var privateKey = fs.readFileSync('./sslcert/privatekey.pem');
@@ -35,6 +36,7 @@ var server = http.createServer(app).listen(socketsPort, function() {
 
 app.use(logfmt.requestLogger());
 app.use(bodyParser.json());
+app.use(disable304());
 
 
 app.post('/loginfacebookpost', facebookUser.login);
