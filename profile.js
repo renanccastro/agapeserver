@@ -89,9 +89,9 @@ module.exports.editProfile = function(request, res) {
 				$set: variablesToEdit
 			}, function(err, response) {
 				if (!err) {
-					res.send(200);
+					res.json({"status" : 200});
 				} else {
-					res.send(404);
+					res.send({"status" : 404});
 					console.log(err);
 				}
 			});
