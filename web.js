@@ -86,26 +86,32 @@ var rooms = {};
 
 io.sockets.on('connection', function(socket) {
 	// when the client emits 'sendchat', this listens and executes
-	socket.on('sendchat', function(data, room) {
+	socket.on('sendchat', function(data) {
+		var room = data.room;
+		var message = data.data;
 		// we tell the client to execute 'updatechat' with 3 parameters, username, room, data
 		//para cada usuário da sala, nós mandamos um update com a mensagem.
-		io.sockets.to(room).emit('updatechat', socket.username, room, data);
+		io.sockets.to(room).emit('updatechat', socket.username, room, message);
 	});
 
 	// when the client emits 'adduser', this listens and executes
-	socket.on('adduser', function(username) {
+	socket.on('adduser', function(data) {
+		var username = data.username;
+		var room = data.room;
+		console.log(data.username);
 		// we store the username in the socket session for this client
 		socket.username = username;
 		// add the client's username to the global list
 		usernames[username] = username;
-	});
-	socket.on('enter_room', function(room){
 		socket.join(room);
-		io.sockets.to(room).emit('updateusers', usernames);
-		
+		if(!rooms[room]){
+			rooms[room] = [];
+		}
+		rooms[room].push(username);
+		io.sockets.to(room).emit('updateusers', room, rooms[room]);
 	});
-
-	// when the user disconnects.. perform this
+	
+	/* when the user disconnects.. perform this
 	socket.on('disconnect', function() {
 		// remove the username from global usernames list
 		delete usernames[socket.username];
@@ -114,4 +120,5 @@ io.sockets.on('connection', function(socket) {
 		// echo globally that this client has left
 		socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
 	});
+	*/
 });
