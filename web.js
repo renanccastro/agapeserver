@@ -107,7 +107,9 @@ io.sockets.on('connection', function(socket) {
 		if(!rooms[room]){
 			rooms[room] = [];
 		}
-		rooms[room].push(username);
+		if(!rooms[room].contains(username)){
+			rooms[room].push(username);
+		}
 		io.sockets.to(room).emit('updateusers', room, rooms[room]);
 	});
 	
@@ -122,3 +124,13 @@ io.sockets.on('connection', function(socket) {
 	});
 	*/
 });
+
+Array.prototype.contains = function(obj) {
+    var i = this.length;
+    while (i--) {
+        if (this[i] === obj) {
+            return true;
+        }
+    }
+    return false;
+}
