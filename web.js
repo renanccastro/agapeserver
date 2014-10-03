@@ -82,15 +82,26 @@ var io = require('socket.io').listen(server);
 
 // usernames which are currently connected to the chat
 var usernames = {};
-var rooms = {};
+var clients = {};
+
+//rooms vai ser um map de FastSets!
+var rooms = require("collections/multi-map");
 
 io.sockets.on('connection', function(socket) {
 	// when the client emits 'sendchat', this listens and executes
 	socket.on('sendchat', function(data) {
 		var room = data.room;
 		var message = data.data;
+		var liveRoomClients = io.sockets.clients(room);
+		for(var client in liveRoomClients){
+			//se o usuário não está conectado a sala, mas ele está nela, mandamos um push notification pra ele!
+			if(!rooms.get(room).has(client)){
+				
+			}
+		}
 		// we tell the client to execute 'updatechat' with 3 parameters, username, room, data
 		//para cada usuário da sala, nós mandamos um update com a mensagem.
+		
 		io.sockets.to(room).emit('updatechat', socket.username, room, message);
 	});
 
@@ -104,8 +115,8 @@ io.sockets.on('connection', function(socket) {
 		// add the client's username to the global list
 		usernames[username] = username;
 		socket.join(room);
-		if(!rooms[room]){
-			rooms[room] = [];
+		if(!rooms.has(room)){
+			rooms.get = [];
 		}
 		if(!rooms[room].contains(username)){
 			rooms[room].push(username);
