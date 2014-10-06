@@ -15,6 +15,11 @@ var notifications = require('./notifications.js');
 var https = require('https');
 var http = require('http');
 var disable304 = require('connect-disable-304');
+var redis = require(NODE_MODULES_PATH + 'redis');
+var RedisStore = require(NODE_MODULES_PATH + 'socket.io/lib/stores/redis');
+var chat = require('./chat.js');
+
+
 
 
 var privateKey = fs.readFileSync('./sslcert/privatekey.pem');
@@ -79,6 +84,13 @@ app.get('/teste', function(req, res) {
 // })
 
 var io = require('socket.io').listen(server);
+var redis_connection = chat.initializeChat();
+io.set('store', new RedisStore({
+      redisPub: redis_connection["sub"],
+      redisSub: redis_connection["pub"],
+      redisClient : redis_connection["client"]
+}));
+
 
 // usernames which are currently connected to the chat
 var usernames = {};
@@ -96,7 +108,7 @@ io.sockets.on('connection', function(socket) {
 		for(var client in liveRoomClients){
 			//se o usuário não está conectado a sala, mas ele está nela, mandamos um push notification pra ele!
 			if(!rooms.get(room).has(client)){
-				
+					
 			}
 		}
 		// we tell the client to execute 'updatechat' with 3 parameters, username, room, data
@@ -124,16 +136,15 @@ io.sockets.on('connection', function(socket) {
 		io.sockets.to(room).emit('updateusers', room, rooms[room]);
 	});
 	
-	/* when the user disconnects.. perform this
+	// when the user disconnects.. perform this
 	socket.on('disconnect', function() {
 		// remove the username from global usernames list
-		delete usernames[socket.username];
 		// update list of users in chat, client-side
 		io.sockets.emit('updateusers', usernames);
 		// echo globally that this client has left
 		socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
 	});
-	*/
+	
 });
 
 Array.prototype.contains = function(obj) {

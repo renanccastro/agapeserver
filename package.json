@@ -26,6 +26,7 @@
     "socket.io": "0.9.x",
     "apn": "~1.6.0",
     "connect-disable-304": "0.0.0",
-    "collections": "~1.2.1"
+    "collections": "~1.2.1",
+    "redis": "~0.12.1"
   }
 }
