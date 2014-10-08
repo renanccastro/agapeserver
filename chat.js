@@ -1,7 +1,7 @@
 // Make things with facebook user
 var mongodb = require('./mongo_db.js');
 var jwt = require('jwt-simple');
-var redis = require(NODE_MODULES_PATH + 'redis');
+var redis = require('redis');
 require('./config.js');
 
 module.exports.initializeChat = function(){
@@ -18,11 +18,10 @@ module.exports.initializeChat = function(){
 	  console.error('There was an error with the redis client ' + err);
 	});
 	
-	if (credentials.password != '') {
-	  subscriber.auth(credentials.password);
-	  publisher.auth(credentials.password);
-	  client.auth(credentials.password);
-	}	
+	  subscriber.auth(tokenSecret);
+	  publisher.auth(tokenSecret);
+	  client.auth(tokenSecret);
+
 	
 	
 	var returnedObject = {};

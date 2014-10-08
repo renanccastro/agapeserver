@@ -15,8 +15,8 @@ var notifications = require('./notifications.js');
 var https = require('https');
 var http = require('http');
 var disable304 = require('connect-disable-304');
-var redis = require(NODE_MODULES_PATH + 'redis');
-var RedisStore = require(NODE_MODULES_PATH + 'socket.io/lib/stores/redis');
+var RedisStore = require('socket.io/lib/stores/redis');
+var redis  = require('redis');
 var chat = require('./chat.js');
 
 
@@ -82,38 +82,52 @@ app.get('/teste', function(req, res) {
 // appSecure.listen(3450, function(){
 // console.log("https listening on 3450");
 // })
-
 var io = require('socket.io').listen(server);
 var redis_connection = chat.initializeChat();
-io.set('store', new RedisStore({
+var redis_client = redis_connection["client"];
+io.set('store', new RedisStore({redis: redis,
       redisPub: redis_connection["sub"],
       redisSub: redis_connection["pub"],
-      redisClient : redis_connection["client"]
+      redisClient : redis_client
 }));
 
 
-// usernames which are currently connected to the chat
-var usernames = {};
-var clients = {};
-
-//rooms vai ser um map de FastSets!
-var rooms = require("collections/multi-map");
-
+// // usernames which are currently connected to the chat
+// var usernames = {};
+// var clients = {};
+//
+// //rooms vai ser um map de FastSets!
+// var rooms = require("collections/multi-map");
+//
 io.sockets.on('connection', function(socket) {
 	// when the client emits 'sendchat', this listens and executes
 	socket.on('sendchat', function(data) {
 		var room = data.room;
 		var message = data.data;
-		var liveRoomClients = io.sockets.clients(room);
-		for(var client in liveRoomClients){
-			//se o usuário não está conectado a sala, mas ele está nela, mandamos um push notification pra ele!
-			if(!rooms.get(room).has(client)){
-					
+
+		var currentClientRooms = io.sockets.manager.roomClients[socket.id];
+		var list = redis_client.redis_get(room, function(){
+			
+		});
+		for(var current_room in currentClientRooms){
+			for(var client in io.sockets.clients(current_room)){
+				client.get(current_room, function(err, offline_users) {
+					console.log(reply);
+					if(offline_users){
+						for(var offline_user in offline_users){
+							
+							//TODO:
+							//ADICIONAR PUSH NOTIFICATION
+						}
+					}
+
+				});
+				
 			}
 		}
 		// we tell the client to execute 'updatechat' with 3 parameters, username, room, data
 		//para cada usuário da sala, nós mandamos um update com a mensagem.
-		
+
 		io.sockets.to(room).emit('updatechat', socket.username, room, message);
 	});
 
@@ -124,27 +138,21 @@ io.sockets.on('connection', function(socket) {
 		console.log(data.username);
 		// we store the username in the socket session for this client
 		socket.username = username;
-		// add the client's username to the global list
-		usernames[username] = username;
-		socket.join(room);
-		if(!rooms.has(room)){
-			rooms.get = [];
-		}
-		if(!rooms[room].contains(username)){
-			rooms[room].push(username);
-		}
-		io.sockets.to(room).emit('updateusers', room, rooms[room]);
+		socket.join(room);		
+		io.sockets.to(room).emit('updateusers', room, io.sockets.clients(room));
 	});
-	
+
 	// when the user disconnects.. perform this
-	socket.on('disconnect', function() {
+	socket.on('disconnect', function(data) {
+		var room = data.room;
+		redis_client.rpush()
 		// remove the username from global usernames list
 		// update list of users in chat, client-side
 		io.sockets.emit('updateusers', usernames);
 		// echo globally that this client has left
 		socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
 	});
-	
+
 });
 
 Array.prototype.contains = function(obj) {
