@@ -16,7 +16,7 @@ var https = require('https');
 var http = require('http');
 var disable304 = require('connect-disable-304');
 var RedisStore = require('socket.io/lib/stores/redis');
-var redis  = require('redis');
+var redis = require('redis');
 var chat = require('./chat.js');
 
 
@@ -61,8 +61,8 @@ app.get('/newprays', prayRequest.newPrays);
 app.get('/getprayrequest', prayRequest.getRandomPray);
 
 app.get('/profile/:id', profile.getProfile);
-app.post('/profile/device',profile.setDevice);
-app.post('/profile/editprofile',profile.editProfile);
+app.post('/profile/device', profile.setDevice);
+app.post('/profile/editprofile', profile.editProfile);
 
 app.get('/notifications', notifications.getNotifications);
 
@@ -85,10 +85,11 @@ app.get('/teste', function(req, res) {
 var io = require('socket.io').listen(server);
 var redis_connection = chat.initializeChat();
 var redis_client = redis_connection["client"];
-io.set('store', new RedisStore({redis: redis,
-      redisPub: redis_connection["sub"],
-      redisSub: redis_connection["pub"],
-      redisClient : redis_client
+io.set('store', new RedisStore({
+	redis: redis,
+	redisPub: redis_connection["sub"],
+	redisSub: redis_connection["pub"],
+	redisClient: redis_client
 }));
 
 
@@ -105,26 +106,16 @@ io.sockets.on('connection', function(socket) {
 		var room = data.room;
 		var message = data.data;
 
-		var currentClientRooms = io.sockets.manager.roomClients[socket.id];
-		var list = redis_client.redis_get(room, function(){
-			
-		});
-		for(var current_room in currentClientRooms){
-			for(var client in io.sockets.clients(current_room)){
-				client.get(current_room, function(err, offline_users) {
-					console.log(reply);
-					if(offline_users){
-						for(var offline_user in offline_users){
-							
-							//TODO:
-							//ADICIONAR PUSH NOTIFICATION
-						}
-					}
-
-				});
-				
+		redis_client.get(room, function(err, offline_users) {
+			console.log("OFFLINE USERS: " + offline_users + " at room: " + room);
+			if (offline_users) {
+				for (var offline_user in offline_users) {
+					console.log('Usuário offline:' + offline_user);
+					//TODO:
+					//ADICIONAR PUSH NOTIFICATION
+				}
 			}
-		}
+		});
 		// we tell the client to execute 'updatechat' with 3 parameters, username, room, data
 		//para cada usuário da sala, nós mandamos um update com a mensagem.
 
@@ -135,32 +126,47 @@ io.sockets.on('connection', function(socket) {
 	socket.on('adduser', function(data) {
 		var username = data.username;
 		var room = data.room;
-		console.log(data.username);
-		// we store the username in the socket session for this client
+
 		socket.username = username;
-		socket.join(room);		
-		io.sockets.to(room).emit('updateusers', room, io.sockets.clients(room));
+		socket.join(room);
+		redis_client.lrem(room, 0, socket.username);
+		var userIds = [];
+		io.sockets.clients().forEach(function(s) {
+			if (s.username) {
+				userIds.push(s.username);
+				console.log("Username: " + s.username + "na sala: " + room);
+			}
+
+		});
+		io.sockets.to(room).emit('updateusers', room, userIds);
 	});
 
 	// when the user disconnects.. perform this
-	socket.on('disconnect', function(data) {
-		var room = data.room;
-		redis_client.rpush()
-		// remove the username from global usernames list
-		// update list of users in chat, client-side
-		io.sockets.emit('updateusers', usernames);
-		// echo globally that this client has left
-		socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
+	socket.on('disconnect', function() {
+		var currentClientRooms = io.sockets.manager.roomClients[socket.id];
+		for (var current_room in currentClientRooms) {
+			console.og
+			redis_client.rpush(current_room, socket.username, function(err, count) {
+				if (err) {
+					console.log("Deu erro na hora de salvar!");
+				}
+			});
+			var userIds = [];
+			io.sockets.clients().forEach(function(s) {
+				userIds.push(s.username);
+			});
+			io.sockets.emit('updateusers', current_room, userIds);
+		}
 	});
 
 });
 
 Array.prototype.contains = function(obj) {
-    var i = this.length;
-    while (i--) {
-        if (this[i] === obj) {
-            return true;
-        }
-    }
-    return false;
+	var i = this.length;
+	while (i--) {
+		if (this[i] === obj) {
+			return true;
+		}
+	}
+	return false;
 }
