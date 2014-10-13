@@ -1,6 +1,7 @@
 var mongodb = require('./mongo_db.js');
 var jwt = require('jwt-simple');
 var ObjectID = require('mongodb').ObjectID;
+var utils = require('./utils.js');
 require('./config.js');
 
 module.exports.getProfile = function(request, res) {
@@ -13,15 +14,7 @@ module.exports.getProfile = function(request, res) {
 		return;
 	}
 	console.log(request.params.id);
-	var targetUserId = request.params.id;
-	var objectId;
-	try {
-		objectId = new ObjectID(targetUserId);
-		targetUserId = objectId;
-	} catch (err) {
-		console.log("Não deu certo o objectId.");
-		targetUserId = request.params.id;
-	}
+	var targetUserId = utils.sanitizedUserID(decoded.userid);
 	mongodb.connect(function(err, db) {
 		db.collection('users', function(er, collection) {
 			collection.findOne({
@@ -54,7 +47,7 @@ module.exports.setDevice = function(request, res) {
 		res.send(403);
 		return;
 	}
-	var userid = decoded.userid;
+	var userid = utils.sanitizedUserID(decoded.userid);
 
 	mongodb.connect(function(err, db) {
 		db.collection('users', function(er, collection) {
@@ -78,7 +71,7 @@ module.exports.editProfile = function(request, res) {
 		res.send(403);
 		return;
 	}
-	var userid = decoded.userid;
+	var userid = utils.sanitizedUserID(decoded.userid);
 	var variablesToEdit = request.body;
 
 	mongodb.connect(function(err, db) {

@@ -18,6 +18,7 @@ var disable304 = require('connect-disable-304');
 var RedisStore = require('socket.io/lib/stores/redis');
 var redis = require('redis');
 var chat = require('./chat.js');
+var apn = require('./apn.js');
 
 
 
@@ -101,21 +102,27 @@ io.set('store', new RedisStore({
 // var rooms = require("collections/multi-map");
 //
 io.sockets.on('connection', function(socket) {
+	socket.on('connect', function(){
+		
+	});
+	
 	// when the client emits 'sendchat', this listens and executes
 	socket.on('sendchat', function(data) {
 		var room = data.room;
 		var message = data.data;
-
-		redis_client.get(room, function(err, offline_users) {
-			console.log("OFFLINE USERS: " + offline_users + " at room: " + room);
-			if (offline_users) {
-				for (var offline_user in offline_users) {
-					console.log('Usuário offline:' + offline_user);
-					//TODO:
-					//ADICIONAR PUSH NOTIFICATION
-				}
-			}
+		redis_client.lrange(room, 0, -1, function (error, items) {
+		  if (error) 
+			  console.log("deu erro na hora de pegar a lista no redis");
+		  items.forEach(function (offline_user) {
+  			console.log("OFFLINE USER: " + offline_user + " at room: " + room);
+  					console.log('Usuário offline:' + offline_user);
+  					//TODO:
+  					//ADICIONAR PUSH NOTIFICATION
+					apn.sendNotificationWithMessageForUser(message, room, socket.username, offline_user);
+  			}
+		  );
 		});
+
 		// we tell the client to execute 'updatechat' with 3 parameters, username, room, data
 		//para cada usuário da sala, nós mandamos um update com a mensagem.
 
@@ -130,8 +137,11 @@ io.sockets.on('connection', function(socket) {
 		socket.username = username;
 		socket.join(room);
 		redis_client.lrem(room, 0, socket.username);
+		// redis_client.sadd(username, room);
+		//adicionamos a sala ao set de salas do jovem, aí o celular não precisa saber de nada o inocente
+		
 		var userIds = [];
-		io.sockets.clients().forEach(function(s) {
+		io.sockets.clients(room).forEach(function(s) {
 			if (s.username) {
 				userIds.push(s.username);
 				console.log("Username: " + s.username + "na sala: " + room);
@@ -144,18 +154,20 @@ io.sockets.on('connection', function(socket) {
 	// when the user disconnects.. perform this
 	socket.on('disconnect', function() {
 		var currentClientRooms = io.sockets.manager.roomClients[socket.id];
+		console.log("Salas do client:" + JSON.stringify(currentClientRooms, null, 4) + JSON.stringify(io.sockets.manager.roomClients, null, 4));
 		for (var current_room in currentClientRooms) {
-			console.og
-			redis_client.rpush(current_room, socket.username, function(err, count) {
+			var actual_room = current_room.substring(1);
+			console.log("sala que houve um disconnect: " + actual_room);
+			redis_client.rpush(actual_room, socket.username, function(err, count) {
 				if (err) {
 					console.log("Deu erro na hora de salvar!");
 				}
 			});
 			var userIds = [];
-			io.sockets.clients().forEach(function(s) {
+			io.sockets.clients(actual_room).forEach(function(s) {
 				userIds.push(s.username);
 			});
-			io.sockets.emit('updateusers', current_room, userIds);
+			io.sockets.emit('updateusers', actual_room, userIds);
 		}
 	});
 
