@@ -2,6 +2,7 @@ var mongodb = require('./mongo_db.js');
 var jwt = require('jwt-simple');
 var apn = require('./apn.js');
 require('./config.js');
+var utils = require('./utils.js');
 
 
 
@@ -47,7 +48,7 @@ module.exports.addPrayRequest = function(request, res) {
 		res.send(403);
 		return;
 	}
-	var userid = decoded.userid;
+	var userid = utils.sanitizedUserID(decoded.userid);
 	var gotDate = {};
 	gotDate[userid] = new Date();
 
@@ -94,7 +95,8 @@ module.exports.newPrays = function(request, res) {
 		res.send(403);
 		return;
 	}
-	var userid = decoded.userid;
+	var userid = utils.sanitizedUserID(decoded.userid);
+	
 	console.log(userid);
 	mongodb.connect(function(err, db) {
 		//Find the Pray, and update the fields(SharedWith   and 	SharedWithLenght)
@@ -138,7 +140,7 @@ module.exports.getRandomPray = function(request, res) {
 		res.send(403);
 		return;
 	}
-	var userid = decoded.userid;
+	var userid = utils.sanitizedUserID(decoded.userid);
 	var gotDate = {};
 	gotDate[userid] = new Date();
 	mongodb.connect(function(err, db) {

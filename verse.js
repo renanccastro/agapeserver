@@ -1,6 +1,7 @@
 var mongodb = require('./mongo_db.js');
 var jwt = require('jwt-simple');
 var apn = require('./apn.js');
+var utils = require('./utils.js');
 require('./config.js');
 
 
@@ -59,7 +60,7 @@ module.exports.addVerse = function(request, res) {
 		res.send(403);
 		return;
 	}
-	var userid = decoded.userid;
+	var userid = utils.sanitizedUserID(decoded.userid);
 	var gotDate = {};
 	gotDate[userid] = new Date();
 
@@ -118,7 +119,7 @@ module.exports.getRandomVerse = function(request, res) {
 		res.send(403);
 		return;
 	}
-	var userid = decoded.userid;
+	var userid = utils.sanitizedUserID(decoded.userid);
 	var gotDate = {};
 	gotDate[userid] = new Date();
 	console.log("User id" + userid);
