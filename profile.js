@@ -14,7 +14,7 @@ module.exports.getProfile = function(request, res) {
 		return;
 	}
 	console.log(request.params.id);
-	var targetUserId = utils.sanitizedUserID(decoded.userid);
+	var targetUserId = utils.sanitizedUserID(request.params.id);
 	mongodb.connect(function(err, db) {
 		db.collection('users', function(er, collection) {
 			collection.findOne({
