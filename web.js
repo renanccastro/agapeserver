@@ -107,7 +107,7 @@ io.sockets.on('connection', function(socket) {
 	});
 	
 	// when the client emits 'sendchat', this listens and executes
-	socket.on('sendchat', function(data) {
+	socket.on('sendchat', function(data, callback) {
 		var room = data.room;
 		var message = data.data;
 		redis_client.lrange(room, 0, -1, function (error, items) {
@@ -116,8 +116,6 @@ io.sockets.on('connection', function(socket) {
 		  items.forEach(function (offline_user) {
   			console.log("OFFLINE USER: " + offline_user + " at room: " + room);
   					console.log('Usuário offline:' + offline_user);
-  					//TODO:
-  					//ADICIONAR PUSH NOTIFICATION
 					apn.sendNotificationWithMessageForUser(message, room, socket.username, offline_user);
   			}
 		  );
@@ -127,6 +125,7 @@ io.sockets.on('connection', function(socket) {
 		//para cada usuário da sala, nós mandamos um update com a mensagem.
 
 		io.sockets.to(room).emit('updatechat', socket.username, room, message);
+		callback();
 	});
 
 	// when the client emits 'adduser', this listens and executes
