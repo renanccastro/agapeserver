@@ -110,6 +110,7 @@ io.sockets.on('connection', function(socket) {
 	socket.on('sendchat', function(data, callback) {
 		var room = data.room;
 		var message = data.data;
+		var username = data.name;
 		redis_client.lrange(room, 0, -1, function (error, items) {
 		  if (error) 
 			  console.log("deu erro na hora de pegar a lista no redis");
@@ -124,7 +125,7 @@ io.sockets.on('connection', function(socket) {
 		// we tell the client to execute 'updatechat' with 3 parameters, username, room, data
 		//para cada usuário da sala, nós mandamos um update com a mensagem.
 
-		io.sockets.to(room).emit('updatechat', socket.username, room, message);
+		io.sockets.to(room).emit('updatechat', socket.username, room, message, username);
 		callback();
 	});
 
