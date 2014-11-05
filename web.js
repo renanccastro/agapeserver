@@ -139,17 +139,31 @@ io.sockets.on('connection', function(socket) {
 		redis_client.lrem(room, 0, socket.username);
 		// redis_client.sadd(username, room);
 		//adicionamos a sala ao set de salas do jovem, aí o celular não precisa saber de nada o inocente
-		
+
 		var userIds = [];
 		io.sockets.clients(room).forEach(function(s) {
 			if (s.username) {
-				userIds.push(s.username);
+				userIds.push({
+					"userId": s.username,
+					"online": "yes"
+				});
 				console.log("Username: " + s.username + "na sala: " + room);
 			}
 
 		});
+		redis_client.lrange(room, 0, -1, function(error, items) {
+			if (error)
+				console.log("deu erro na hora de pegar a lista no redis");
+			items.forEach(function(offline_user) {
+				userIds.push({
+					"userId": s.username,
+					"online": "no"
+				});
+			});
+		});
 		io.sockets.to(room).emit('updateusers', room, userIds);
 	});
+
 
 	// when the user disconnects.. perform this
 	socket.on('disconnect', function() {
