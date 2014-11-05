@@ -151,16 +151,6 @@ io.sockets.on('connection', function(socket) {
 			}
 
 		});
-		redis_client.lrange(room, 0, -1, function(error, items) {
-			if (error)
-				console.log("deu erro na hora de pegar a lista no redis");
-			items.forEach(function(offline_user) {
-				userIds.push({
-					"userId": offline_user,
-					"online": "no"
-				});
-			});
-		});
 		io.sockets.to(room).emit('updateusers', room, userIds);
 	});
 
@@ -187,16 +177,6 @@ io.sockets.on('connection', function(socket) {
 					console.log("Username: " + s.username + "na sala: " + actual_room);
 				}
 
-			});
-			redis_client.lrange(actual_room, 0, -1, function(error, items) {
-				if (error)
-					console.log("deu erro na hora de pegar a lista no redis");
-				items.forEach(function(offline_user) {
-					userIds.push({
-						"userId": offline_user,
-						"online": "no"
-					});
-				});
 			});
 			io.sockets.to(actual_room).emit('updateusers', actual_room, userIds);
 		}
