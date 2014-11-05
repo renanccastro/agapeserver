@@ -156,7 +156,7 @@ io.sockets.on('connection', function(socket) {
 				console.log("deu erro na hora de pegar a lista no redis");
 			items.forEach(function(offline_user) {
 				userIds.push({
-					"userId": s.username,
+					"userId": offline_user,
 					"online": "no"
 				});
 			});
