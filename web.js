@@ -184,7 +184,7 @@ io.sockets.on('connection', function(socket) {
 						"userId": s.username,
 						"online": "yes"
 					});
-					console.log("Username: " + s.username + "na sala: " + room);
+					console.log("Username: " + s.username + "na sala: " + actual_room);
 				}
 
 			});
