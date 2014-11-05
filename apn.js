@@ -15,6 +15,9 @@ var apnConnection = new apn.Connection(options);
 module.exports.sendNotificationForUser = function(notification, userid) {
 	var targetUserId = utils.sanitizedUserID(userid);
 	mongodb.connect(function(err, db) {
+		if(err){
+			return;
+		}
 		db.collection('users').findOne({
 			"_id": targetUserId
 		}, function(err, user) {
