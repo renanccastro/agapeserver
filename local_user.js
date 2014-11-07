@@ -104,7 +104,6 @@ module.exports.login = function(request, res) {
 */
 module.exports.createLocalUser = function(request, res) {
    var LastModified = new Date();
-   LastModified.setMilliseconds(0);
 
 	var document = {
 		"email": request.body.email,
