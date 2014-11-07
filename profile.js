@@ -36,7 +36,7 @@ module.exports.getProfile = function(request, res) {
 				response.city = user.city;
 				response.country = user.country;
 				response.photo = user.photo;
-				response.lastModified = user.LastModified;
+				response.LastModified = user.LastModified;
 				response.denomination = user.denomination;
 				res.json(response);
 			});
