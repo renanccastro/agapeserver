@@ -31,24 +31,24 @@ module.exports.initializeChat = function(){
 	return returnedObject;
 };
 
-module.exports.userConnected = function(socket, username, room){
-	console.log(username);
-	// we store the username in the socket session for this client
-	socket.username = username;
-	// add the client's username to the global list
-	mongodb.connect(function (err, db) {
-  	  	db.collection('chat', function(er, collection) {
-				
-		});	
-	});
-	usernames[username] = username;
-	socket.join(room);
-	if(!rooms.has(room)){
-		rooms.get = [];
-	}
-	if(!rooms[room].contains(username)){
-		rooms[room].push(username);
-	}
-	io.sockets.to(room).emit('updateusers', room, rooms[room]);
-		
-};
+// module.exports.userConnected = function(socket, username, room){
+// 	console.log(username);
+// 	// we store the username in the socket session for this client
+// 	socket.username = username;
+// 	// add the client's username to the global list
+// 	mongodb.connect(function (err, db) {
+//   	  	db.collection('chat', function(er, collection) {
+//
+// 		});
+// 	});
+// 	usernames[username] = username;
+// 	socket.join(room);
+// 	if(!rooms.has(room)){
+// 		rooms.get = [];
+// 	}
+// 	if(!rooms[room].contains(username)){
+// 		rooms[room].push(username);
+// 	}
+// 	io.sockets.to(room).emit('updateusers', room, rooms[room]);
+//
+// };

@@ -46,7 +46,15 @@ module.exports.login = function(request, res) {
 	var password = request.body.password;
 
 	mongodb.connect(function(err, db) {
+		if(err){res.send(404);
+			return;
+		}
+		
 		db.collection('users', function(er, collection) {
+			if(er){res.send(404);
+				return;
+			}
+			
 			collection.findOne({
 				"email": email
 			}, function(er, user) {
@@ -106,13 +114,21 @@ module.exports.createLocalUser = function(request, res) {
 		"state": request.body.state,
 		"city": request.body.city,
 		"country": request.body.country,
-		"lastModified": new Date()
+		"LastModified": new Date()
 	};
 
 	console.log(document);
 
 	mongodb.connect(function(err, db) {
+		if(err){res.send(404);
+			return;
+		}
+		
 		db.collection('users', function(er, collection) {
+			if(er){res.send(404);
+				return;
+			}
+			
 			collection.findOne({
 				"email": request.body.email
 			}, function(er, user) {

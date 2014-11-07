@@ -15,10 +15,12 @@ module.exports.getProfile = function(request, res) {
 	}
 	console.log(request.params.id);
 	var targetUserId = utils.sanitizedUserID(request.params.id);
+	var lastModified = new Date(request.params.lastModified);
 	mongodb.connect(function(err, db) {
 		db.collection('users', function(er, collection) {
 			collection.findOne({
-				'_id': targetUserId
+				'_id': targetUserId,
+				'LastModified' : {$gt : lastModified}
 			}, function(er, user) {
 				if (er || user == null) {
 					res.send(404);
@@ -33,7 +35,7 @@ module.exports.getProfile = function(request, res) {
 				response.city = user.city;
 				response.country = user.country;
 				response.photo = user.photo;
-				response.lastModified = user.lastModified;
+				response.lastModified = user.LastModified;
 				response.denomination = user.denomination;
 				res.json(response);
 			});
@@ -73,6 +75,7 @@ module.exports.editProfile = function(request, res) {
 	}
 	var userid = utils.sanitizedUserID(decoded.userid);
 	var variablesToEdit = request.body;
+	variablesToEdit["LastModified"] = new Date();
 
 	mongodb.connect(function(err, db) {
 		db.collection('users', function(er, collection) {

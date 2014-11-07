@@ -31,7 +31,14 @@ module.exports.loginAndCreatIfNotExists = function(request, res){
 
 
    	mongodb.connect(function (err, db) {
+		if(err){res.send(404);
+			return;
+		}
 	  db.collection('users', function(er, collection) {
+  		if(er){res.send(404);
+  			return;
+  		}
+		  
 	    collection.findOne({'_id': facebookuserid}, function(er,user) {
 	    	//verifica se achou o usuário
 	    	if (user != null) {
@@ -59,7 +66,15 @@ module.exports.login = function(request, res){
 
 
    	mongodb.connect(function (err, db) {
+		if(err){res.send(404);
+			return;
+		}
+		
 	  db.collection('users', function(er, collection) {
+  		if(er){res.send(404);
+  			return;
+  		}
+		  
 	    collection.findOne({'_id': facebookuserid}, function(er,user) {
 	    	//verifica se achou o usuário
 	    	if (user != null) {
@@ -135,7 +150,7 @@ function createFacebookUser(requestInfo, response){
 		   	   "name" : userInfo.name,
 			   "email" : userInfo.email, "gender" : userInfo.gender ? (userInfo.gender == "male" ? "M" : "F") : null,
 			   "birthday" : new Date(userInfo.birthday),
-	   		   "lastModified": new Date(),
+	   		   "LastModified": new Date(),
 		   	   "city" : city, "state": state};
 				
 				
@@ -146,6 +161,10 @@ function createFacebookUser(requestInfo, response){
 		 		   console.log(document);
 
 		 		   mongodb.connect( function (err, db) {
+						if(err){res.send(404);
+							return;
+						}
+					   
 		 		   		db.collection('users').insert(document, function(err, records) {
 		 					if (err){
 								console.log(err);

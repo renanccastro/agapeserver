@@ -15,7 +15,7 @@ var apnConnection = new apn.Connection(options);
 module.exports.sendNotificationForUser = function(notification, userid) {
 	var targetUserId = utils.sanitizedUserID(userid);
 	mongodb.connect(function(err, db) {
-		if(err){
+		if(err){res.send(404);
 			return;
 		}
 		db.collection('users').findOne({
@@ -43,6 +43,9 @@ module.exports.sendNotificationForUser = function(notification, userid) {
 module.exports.sendNotificationWithMessageForUser = function(message, room, fromUserid, toUserid) {
 	var targetUserId = utils.sanitizedUserID(toUserid);
 	mongodb.connect(function(err, db) {
+		if(err){res.send(404);
+			return;
+		}
 		db.collection('users').findOne({
 			"_id": targetUserId
 		}, function(err, user) {

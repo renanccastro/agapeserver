@@ -12,7 +12,15 @@ module.exports.getNotifications = function(request, res){
 	var userid = decoded.userid;
 	
 	mongodb.connect(function(err, db) {
+		if(err){res.send(404);
+			return;
+		}
+		
 		db.collection('notifications', function(er, collection) {
+			if(er){res.send(404);
+				return;
+			}
+			
 			collection.findOne({
 				"userid": userid
 			}, function(er, not) {

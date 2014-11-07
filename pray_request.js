@@ -53,6 +53,9 @@ module.exports.addPrayRequest = function(request, res) {
 	gotDate[userid] = new Date();
 
 	mongodb.connect(function(err, db) {
+		if(err){res.send(404);
+			return;
+		}
 
 		var pray = request.body;
 		pray.Author = userid;
@@ -99,6 +102,10 @@ module.exports.newPrays = function(request, res) {
 	
 	console.log(userid);
 	mongodb.connect(function(err, db) {
+		if(err){res.send(404);
+			return;
+		}
+		
 		//Find the Pray, and update the fields(SharedWith   and 	SharedWithLenght)
 		db.collection('pray_requests').findOne({
 				//acha pedidos que não são do usuário e que não foram pegos por ele ainda
