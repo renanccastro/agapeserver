@@ -146,11 +146,13 @@ function createFacebookUser(requestInfo, response){
 		  city = location[0];
 		  state = location[1];
        }
+		   var LastModified = new Date();
+		   LastModified.setMilliseconds(0);
 		   var document = {"_id" : userInfo.facebookuserid,
 		   	   "name" : userInfo.name,
 			   "email" : userInfo.email, "gender" : userInfo.gender ? (userInfo.gender == "male" ? "M" : "F") : null,
 			   "birthday" : new Date(userInfo.birthday),
-	   		   "LastModified": new Date(),
+	   		   "LastModified": LastModified,
 		   	   "city" : city, "state": state};
 				
 				

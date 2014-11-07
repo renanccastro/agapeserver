@@ -103,6 +103,8 @@ module.exports.login = function(request, res) {
 *	@apiError (Erro na autenticação) {String} status failed
 */
 module.exports.createLocalUser = function(request, res) {
+   var LastModified = new Date();
+   LastModified.setMilliseconds(0);
 
 	var document = {
 		"email": request.body.email,
@@ -114,7 +116,7 @@ module.exports.createLocalUser = function(request, res) {
 		"state": request.body.state,
 		"city": request.body.city,
 		"country": request.body.country,
-		"LastModified": new Date()
+		"LastModified": LastModified
 	};
 
 	console.log(document);
