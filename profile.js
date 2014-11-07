@@ -15,7 +15,7 @@ module.exports.getProfile = function(request, res) {
 	}
 	console.log(request.params.id);
 	var targetUserId = utils.sanitizedUserID(request.params.id);
-	var lastModified = new Date(request.params.lastModified);
+	var lastModified = new Date(request.query.lastModified);
 	mongodb.connect(function(err, db) {
 		db.collection('users', function(er, collection) {
 			collection.findOne({
