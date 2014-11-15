@@ -2,7 +2,6 @@
 var express = require("express");
 var logfmt = require("logfmt");
 var app = express();
-var mongo = require('mongodb');
 var crypto = require('crypto');
 var fs = require('fs');
 var facebookUser = require('./facebook_user.js');
@@ -19,6 +18,8 @@ var RedisStore = require('socket.io/lib/stores/redis');
 var redis = require('redis');
 var chat = require('./chat.js');
 var apn = require('./apn.js');
+// var mongodb = require('express-mongo-db')({db : "agape"});
+// console.log(mongodb.config);
 
 
 
@@ -40,6 +41,8 @@ var server = http.createServer(app).listen(socketsPort, function() {
 	console.log("Sockets Listening on " + socketsPort);
 });
 
+
+app.use(require('express-mongo-db')(require('mongodb'),{db:"agape"}));
 app.use(logfmt.requestLogger());
 app.use(bodyParser.json());
 app.use(disable304());
@@ -66,18 +69,6 @@ app.post('/profile/device', profile.setDevice);
 app.post('/profile/editprofile', profile.editProfile);
 
 app.get('/notifications', notifications.getNotifications);
-
-app.get('/teste', function(req, res) {
-	mongo.Db.connect(mongoUri, function(err, db) {
-		db.collection('users', function(er, collection) {
-			collection.insert({
-				'mykey': 'myvalue'
-			}, {
-				safe: true
-			}, function(er, rs) {});
-		});
-	});
-});
 
 
 // appSecure.listen(3450, function(){
@@ -108,6 +99,7 @@ io.sockets.on('connection', function(socket) {
 	
 	// when the client emits 'sendchat', this listens and executes
 	socket.on('sendchat', function(data, callback) {
+		console.log(io.db);
 		var room = data.room;
 		var message = data.data;
 		var username = data.name;

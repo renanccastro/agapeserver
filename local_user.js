@@ -45,35 +45,43 @@ module.exports.login = function(request, res) {
 	var email = request.body.email;
 	var password = request.body.password;
 
-	mongodb.connect(function(err, db) {
-		if(err){res.send(404);
+	request.db.collection('users', function(er, collection) {
+		if (er) {
+			res.send(404);
 			return;
 		}
-		
-		db.collection('users', function(er, collection) {
-			if(er){res.send(404);
-				return;
-			}
-			
-			collection.findOne({
-				"email": email
-			}, function(er, user) {
-				//verifica se achou o usuário
-				if (user) {
-					if (user.password == password) {
-						var token = jwt.encode({userid: user._id}, tokenSecret);
-						res.send({"message" : user, "status": "ok", "token" : token});
-					} else {
-						console.log("teste"+user.password + request.body.password);
-						res.send({"message" : "Senha inválida", "status": "failed"});
-					}
+
+		collection.findOne({
+			"email": email
+		}, function(er, user) {
+			//verifica se achou o usuário
+			if (user) {
+				if (user.password == password) {
+					var token = jwt.encode({
+						userid: user._id
+					}, tokenSecret);
+					res.send({
+						"message": user,
+						"status": "ok",
+						"token": token
+					});
 				} else {
-					res.send({"message" : "Usuário não encontrado", "status": "failed"});	
+					console.log("teste" + user.password + request.body.password);
+					res.send({
+						"message": "Senha inválida",
+						"status": "failed"
+					});
 				}
-			});
+			} else {
+				res.send({
+					"message": "Usuário não encontrado",
+					"status": "failed"
+				});
+			}
 		});
 	});
 };
+
 
 
 /**
@@ -103,7 +111,7 @@ module.exports.login = function(request, res) {
 *	@apiError (Erro na autenticação) {String} status failed
 */
 module.exports.createLocalUser = function(request, res) {
-   var LastModified = new Date();
+	var LastModified = new Date();
 
 	var document = {
 		"email": request.body.email,
@@ -120,34 +128,35 @@ module.exports.createLocalUser = function(request, res) {
 
 	console.log(document);
 
-	mongodb.connect(function(err, db) {
-		if(err){res.send(404);
+	request.db.collection('users', function(er, collection) {
+		if (er) {
+			res.send(404);
 			return;
 		}
-		
-		db.collection('users', function(er, collection) {
-			if(er){res.send(404);
-				return;
-			}
-			
-			collection.findOne({
-				"email": request.body.email
-			}, function(er, user) {
-				//verifica se achou o usuário
-				if (user) {
-					response = {"message" : "Usuário já existe", "status": "failed"};
+
+		collection.findOne({
+			"email": request.body.email
+		}, function(er, user) {
+			//verifica se achou o usuário
+			if (user) {
+				response = {
+					"message": "Usuário já existe",
+					"status": "failed"
+				};
+				res.json(response);
+			} else {
+				//insere o usuario
+				request.db.collection('users').insert(document, function(err, records) {
+					if (err)
+						throw err;
+					response = {
+						"message": records[0]._id,
+						"status": "ok"
+					};
 					res.json(response);
-				} else {
-					//insere o usuario
-					db.collection('users').insert(document, function(err, records) {
-						if (err)
-							throw err;
-						response = {"message" : records[0]._id, "status": "ok"};
-						res.json(response);
-						console.log("Record added as " + records[0]._id);
-					});
-				}
-	 		});
+					console.log("Record added as " + records[0]._id);
+				});
+			}
 		});
 	});
 }

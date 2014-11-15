@@ -64,39 +64,38 @@ module.exports.addVerse = function(request, res) {
 	var gotDate = {};
 	gotDate[userid] = new Date();
 
-	mongodb.connect(function(err, db) {
 
-		var verse = request.body;
-		verse.Author = userid;
-		verse.CreationDate = new Date();
-		verse.SharedWith = [];
-		verse.SharedWithLength = 0;
-		verse.GotDate = [gotDate];
+	var verse = request.body;
+	verse.Author = userid;
+	verse.CreationDate = new Date();
+	verse.SharedWith = [];
+	verse.SharedWithLength = 0;
+	verse.GotDate = [gotDate];
 
-		//Inserts verse into the collection
-		db.collection('verses').insert(verse, function(err, records) {
-			if (err)
-				throw err;
+	//Inserts verse into the collection
+	request.db.collection('verses').insert(verse, function(err, records) {
+		if (err)
+			throw err;
 
-			console.log("New verse added as " + records[0]._id);
+		console.log("New verse added as " + records[0]._id);
 
-			//Insert verse (ID) into the user's verses
-			db.collection('users').update({
-				_id: records[0].Author
-			}, {
-				$push: {
-					Verses: records[0]._id
-				}
-			}, function(err, record) {
-				if (!err)
-					res.json(records[0]);
-				else
-					res.send(404);
-			});
-
+		//Insert verse (ID) into the user's verses
+		request.db.collection('users').update({
+			_id: records[0].Author
+		}, {
+			$push: {
+				Verses: records[0]._id
+			}
+		}, function(err, record) {
+			if (!err)
+				res.json(records[0]);
+			else
+				res.send(404);
 		});
+
 	});
 };
+
 
 
 /**
@@ -124,67 +123,66 @@ module.exports.getRandomVerse = function(request, res) {
 	gotDate[userid] = new Date();
 	console.log("User id" + userid);
 	console.log(gotDate);
-	mongodb.connect(function(err, db) {
-		//Find the verse, and update the fields(SharedWith   and 	SharedWithLenght)
-		db.collection('verses').findAndModify({
-				//acha versículos que não são do usuário e que não foram pegos por ele ainda
-				Author: {
-					$ne: userid
-				},
-				SharedWith: {
-					$nin: [userid]
-				}
-			}, [
-				["SharedWithLength", "asc"],
-				["CreationDate", "asc"]
-			], {
+	//Find the verse, and update the fields(SharedWith   and 	SharedWithLenght)
+	request.db.collection('verses').findAndModify({
+			//acha versículos que não são do usuário e que não foram pegos por ele ainda
+			Author: {
+				$ne: userid
+			},
+			SharedWith: {
+				$nin: [userid]
+			}
+		}, [
+			["SharedWithLength", "asc"],
+			["CreationDate", "asc"]
+		], {
+			$push: {
+				SharedWith: userid,
+				GotDate: gotDate
+			},
+			$inc: {
+				SharedWithLength: 1
+			}
+		},
+		//Seta para já vir o documento atualizado
+		{
+			"new": true
+		},
+		function(err, record) {
+			console.log("record" + record);
+			//se não conseguiu achar, retorna 404.
+			if (err || !record) {
+				console.log(err);
+				res.send(404);
+				return;
+			}
+
+			console.log("Versículo " + record);
+
+			//Insert verse (ID) into the user's verses pocket
+			request.db.collection('users').update({
+				_id: record.Author
+			}, {
 				$push: {
-					SharedWith: userid,
-					GotDate: gotDate
-				},
-				$inc: {
-					SharedWithLength: 1
+					Verses: record._id
 				}
-			},
-			//Seta para já vir o documento atualizado
-			{
-				"new": true
-			},
-			function(err, record) {
-				console.log("record" + record);
-				//se não conseguiu achar, retorna 404.
-				if (err || !record) {
-					console.log(err);
-					res.send(404);
-					return;
-				}
-
-				console.log("Versículo " + record);
-
-				//Insert verse (ID) into the user's verses pocket
-				db.collection('users').update({
-					_id: record.Author
-				}, {
-					$push: {
-						Verses: record._id
-					}
-				}, function(err, records) {
-					res.json(record);
-				});
-
-				//Insert verse notification for author
-				var notification = {};
-				notification[record._id] = userid;
-				apn.sendNotificationForUser(notification, record.Author);
-				// db.collection('notifications').update({
-				// 	"userid": record.Author
-				// }, {
-				// 	$push: {
-				// 		Verses: notification
-				// 	}
-				// },{ upsert: true },function(err, records) {
-				// });
+			}, function(err, records) {
+				res.json(record);
 			});
-	});
 
+			//Insert verse notification for author
+			var notification = {};
+			notification[record._id] = userid;
+			apn.sendNotificationForUser(request.db, notification, record.Author);
+			// db.collection('notifications').update({
+			// 	"userid": record.Author
+			// }, {
+			// 	$push: {
+			// 		Verses: notification
+			// 	}
+			// },{ upsert: true },function(err, records) {
+			// });
+		});
 }
+
+

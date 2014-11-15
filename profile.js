@@ -17,32 +17,34 @@ module.exports.getProfile = function(request, res) {
 	var targetUserId = utils.sanitizedUserID(request.params.id);
 	var lastModified = new Date(request.query.lastModified);
 	console.log("LastModified get profile with date: " + lastModified + "\n");
-	mongodb.connect(function(err, db) {
-		db.collection('users', function(er, collection) {
-			collection.findOne({
-				'_id': targetUserId,
-				'LastModified' : {$gt : lastModified}
-			}, function(er, user) {
-				if (er || user == null) {
-					res.send(404);
-					return;
-				}
-				var response = {};
-				response._id = user._id;
-				response.name = user.name;
-				response.email = user.email;
-				response.gender = user.gender;
-				response.state = user.state;
-				response.city = user.city;
-				response.country = user.country;
-				response.photo = user.photo;
-				response.LastModified = user.LastModified;
-				response.denomination = user.denomination;
-				res.json(response);
-			});
+	request.db.collection('users', function(er, collection) {
+		collection.findOne({
+			'_id': targetUserId,
+			'LastModified': {
+				$gt: lastModified
+			}
+		}, function(er, user) {
+			if (er || user == null) {
+				res.send(404);
+				return;
+			}
+			var response = {};
+			response._id = user._id;
+			response.name = user.name;
+			response.email = user.email;
+			response.gender = user.gender;
+			response.state = user.state;
+			response.city = user.city;
+			response.country = user.country;
+			response.photo = user.photo;
+			response.LastModified = user.LastModified;
+			response.denomination = user.denomination;
+			res.json(response);
 		});
 	});
+
 }
+
 module.exports.setDevice = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
 
@@ -52,21 +54,20 @@ module.exports.setDevice = function(request, res) {
 	}
 	var userid = utils.sanitizedUserID(decoded.userid);
 
-	mongodb.connect(function(err, db) {
-		db.collection('users', function(er, collection) {
-			collection.update({
-				"_id": userid
-			}, {
-				$set: {
-					"device": request.body.device
-				}
-			}, function(err, response) {
-				if (!err) res.send(200);
-				else res.send(404);
-			});
+	request.db.collection('users', function(er, collection) {
+		collection.update({
+			"_id": userid
+		}, {
+			$set: {
+				"device": request.body.device
+			}
+		}, function(err, response) {
+			if (!err) res.send(200);
+			else res.send(404);
 		});
 	});
 }
+
 module.exports.editProfile = function(request, res) {
 	var decoded = jwt.decode(request.headers.token, tokenSecret);
 
@@ -78,20 +79,23 @@ module.exports.editProfile = function(request, res) {
 	var variablesToEdit = request.body;
 	variablesToEdit["LastModified"] = new Date();
 
-	mongodb.connect(function(err, db) {
-		db.collection('users', function(er, collection) {
-			collection.update({
-				"_id": userid
-			}, {
-				$set: variablesToEdit
-			}, function(err, response) {
-				if (!err) {
-					res.json({"status" : 200});
-				} else {
-					res.send({"status" : 404});
-					console.log(err);
-				}
-			});
+	request.db.collection('users', function(er, collection) {
+		collection.update({
+			"_id": userid
+		}, {
+			$set: variablesToEdit
+		}, function(err, response) {
+			if (!err) {
+				res.json({
+					"status": 200
+				});
+			} else {
+				res.send({
+					"status": 404
+				});
+				console.log(err);
+			}
 		});
 	});
 }
+

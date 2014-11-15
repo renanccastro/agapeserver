@@ -17,17 +17,18 @@
   },
   "homepage": "https://github.com/renanccastro/agapeserver",
   "dependencies": {
+    "apn": "~1.6.0",
     "body-parser": "^1.4.3",
+    "collections": "~1.2.1",
+    "connect-disable-304": "0.0.0",
     "express": "~4.4.5",
+    "express-mongo-db": "^0.4.0",
     "jwt-simple": "^0.2.0",
     "logfmt": "~1.1.2",
-    "mongodb": "~1.4.7",
+    "mongodb": "^1.4.20",
+    "redis": "~0.12.1",
     "request": "~2.38.0",
     "socket.io": "0.9.x",
-    "apn": "~1.6.0",
-    "connect-disable-304": "0.0.0",
-    "collections": "~1.2.1",
-    "redis": "~0.12.1",
     "socket.io-redis": "~0.1.3"
   }
 }

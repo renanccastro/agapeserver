@@ -24,75 +24,82 @@ require('./config.js');
 * 
 *	@apiError (403 - Erro na autenticação) 403 Falha na autenticação do facebook token.
 */
-module.exports.loginAndCreatIfNotExists = function(request, res){
-   console.log("facebookuserid: " + request.body.facebookuserid + " accesstoken: "+ request.body.accesstoken);
-   var accesstoken = request.body.accesstoken;
-   var facebookuserid = request.body.facebookuserid;
+module.exports.loginAndCreatIfNotExists = function(request, res) {
+	console.log("facebookuserid: " + request.body.facebookuserid + " accesstoken: " + request.body.accesstoken);
+	var accesstoken = request.body.accesstoken;
+	var facebookuserid = request.body.facebookuserid;
 
 
-   	mongodb.connect(function (err, db) {
-		if(err){res.send(404);
+	request.db.collection('users', function(er, collection) {
+		if (er) {
+			res.send(404);
 			return;
 		}
-	  db.collection('users', function(er, collection) {
-  		if(er){res.send(404);
-  			return;
-  		}
-		  
-	    collection.findOne({'_id': facebookuserid}, function(er,user) {
-	    	//verifica se achou o usuário
-	    	if (user != null) {
-   				parseUserToken(accesstoken, request, function(userInfo){
-					var token = jwt.encode({userid: user._id}, tokenSecret);
-   					res.json({"profile": user, "created_now": "NO", "token" : token});
-   				}, function(error){
-   					res.send(error.code);
-   				});
 
-		    }else{
-		    	createFacebookUser(request, res);
-		    }
-	    });
-	  });
+		collection.findOne({
+			'_id': facebookuserid
+		}, function(er, user) {
+			//verifica se achou o usuário
+			if (user != null) {
+				parseUserToken(accesstoken, request, function(userInfo) {
+					var token = jwt.encode({
+						userid: user._id
+					}, tokenSecret);
+					res.json({
+						"profile": user,
+						"created_now": "NO",
+						"token": token
+					});
+				}, function(error) {
+					res.send(error.code);
+				});
+
+			} else {
+				createFacebookUser(request, res);
+			}
+		});
 	});
 };
 
 
 
-module.exports.login = function(request, res){
-   console.log("facebookuserid: " + request.body.facebookuserid + " accesstoken: "+ request.body.accesstoken);
-   var accesstoken = request.body.accesstoken;
-   var facebookuserid = request.body.facebookuserid;
+
+module.exports.login = function(request, res) {
+	console.log("facebookuserid: " + request.body.facebookuserid + " accesstoken: " + request.body.accesstoken);
+	var accesstoken = request.body.accesstoken;
+	var facebookuserid = request.body.facebookuserid;
 
 
-   	mongodb.connect(function (err, db) {
-		if(err){res.send(404);
+	request.db.collection('users', function(er, collection) {
+		if (er) {
+			res.send(404);
 			return;
 		}
-		
-	  db.collection('users', function(er, collection) {
-  		if(er){res.send(404);
-  			return;
-  		}
-		  
-	    collection.findOne({'_id': facebookuserid}, function(er,user) {
-	    	//verifica se achou o usuário
-	    	if (user != null) {
-   				parseUserToken(accesstoken, request, function(userInfo){
-					var token = jwt.encode({userid: user._id}, tokenSecret);
-   					res.json({"profile": user, "created_now": "YES", "token" : token});
-   				}, function(error){
-   					res.send("Failed to authenticate.");
-   				});
 
-		    }else{
-		    	res.send("No user Found.");
-		    }
-	    });
-	  });
+		collection.findOne({
+			'_id': facebookuserid
+		}, function(er, user) {
+			//verifica se achou o usuário
+			if (user != null) {
+				parseUserToken(accesstoken, request, function(userInfo) {
+					var token = jwt.encode({
+						userid: user._id
+					}, tokenSecret);
+					res.json({
+						"profile": user,
+						"created_now": "YES",
+						"token": token
+					});
+				}, function(error) {
+					res.send("Failed to authenticate.");
+				});
+
+			} else {
+				res.send("No user Found.");
+			}
+		});
 	});
 };
-
 
 module.exports.createFacebookUser = createFacebookUser;
 
@@ -134,58 +141,63 @@ function parseUserToken(token, postData, callback, failCallback) {
 
 
 //Cria um usuario no facebook
-function createFacebookUser(requestInfo, response){
-   var accesstoken = requestInfo.body.accesstoken;
 
-   var validTokenCallback = function(userInfo){
-	   
-	   var location = userInfo.location;
-	   var city, state;
-       if (location != null){
-		  location = location.split(", ");
-		  city = location[0];
-		  state = location[1];
-       }
-		   var LastModified = new Date();
-		   var document = {"_id" : userInfo.facebookuserid,
-		   	   "name" : userInfo.name,
-			   "email" : userInfo.email, "gender" : userInfo.gender ? (userInfo.gender == "male" ? "M" : "F") : null,
-			   "birthday" : new Date(userInfo.birthday),
-	   		   "LastModified": LastModified,
-		   	   "city" : city, "state": state};
-				
-				
-			   console.log("Antes de chamar");
-				var callback = function(image, prefix){
-					document.photo = prefix + image;
-					console.log("Chamou!");
-		 		   console.log(document);
+function createFacebookUser(requestInfo, response) {
+	var accesstoken = requestInfo.body.accesstoken;
 
-		 		   mongodb.connect( function (err, db) {
-						if(err){res.send(404);
-							return;
-						}
-					   
-		 		   		db.collection('users').insert(document, function(err, records) {
-		 					if (err){
-								console.log(err);
-		 						throw err;
-							}
-						
-		 					var token = jwt.encode({userid: records[0]._id}, tokenSecret);
-		 	   				response.json({"profile": records[0], "created_now": "YES", "token" : token});
-		 					console.log("Record added as "+records[0]._id);
-		 				});
-		 			});					
-				};
-				loadBase64Image(userInfo.photo, callback);
+	var validTokenCallback = function(userInfo) {
+
+		var location = userInfo.location;
+		var city, state;
+		if (location != null) {
+			location = location.split(", ");
+			city = location[0];
+			state = location[1];
+		}
+		var LastModified = new Date();
+		var document = {
+			"_id": userInfo.facebookuserid,
+			"name": userInfo.name,
+			"email": userInfo.email,
+			"gender": userInfo.gender ? (userInfo.gender == "male" ? "M" : "F") : null,
+			"birthday": new Date(userInfo.birthday),
+			"LastModified": LastModified,
+			"city": city,
+			"state": state
+		};
 
 
-   	};
-   var failedCallback = function(error){
+		console.log("Antes de chamar");
+		var callback = function(image, prefix) {
+			document.photo = prefix + image;
+			console.log("Chamou!");
+			console.log(document);
 
-   };
-   parseUserToken(accesstoken, requestInfo, validTokenCallback, failedCallback);
+			requestInfo.db.collection('users').insert(document, function(err, records) {
+				if (err) {
+					console.log(err);
+					throw err;
+				}
+
+				var token = jwt.encode({
+					userid: records[0]._id
+				}, tokenSecret);
+				response.json({
+					"profile": records[0],
+					"created_now": "YES",
+					"token": token
+				});
+				console.log("Record added as " + records[0]._id);
+			});
+		};
+		loadBase64Image(userInfo.photo, callback);
+
+
+	};
+	var failedCallback = function(error) {
+
+	};
+	parseUserToken(accesstoken, requestInfo, validTokenCallback, failedCallback);
 };
 
 

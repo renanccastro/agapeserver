@@ -52,43 +52,39 @@ module.exports.addPrayRequest = function(request, res) {
 	var gotDate = {};
 	gotDate[userid] = new Date();
 
-	mongodb.connect(function(err, db) {
-		if(err){res.send(404);
-			return;
-		}
 
-		var pray = request.body;
-		pray.Author = userid;
-		pray.CreationDate = new Date();
-		pray.EstimatedEndDate = new Date(request.body.EstimatedEndDate);
-		pray.SharedWith = [];
-		pray.SharedWithLength = 0;
-		pray.GotDate = [gotDate];
+	var pray = request.body;
+	pray.Author = userid;
+	pray.CreationDate = new Date();
+	pray.EstimatedEndDate = new Date(request.body.EstimatedEndDate);
+	pray.SharedWith = [];
+	pray.SharedWithLength = 0;
+	pray.GotDate = [gotDate];
 
-		//Inserts pray into the collection
-		db.collection('pray_requests').insert(pray, function(err, records) {
-			if (err)
-				throw err;
+	//Inserts pray into the collection
+	request.db.collection('pray_requests').insert(pray, function(err, records) {
+		if (err)
+			throw err;
 
-			console.log("New pray request added as " + records[0]._id);
+		console.log("New pray request added as " + records[0]._id);
 
-			//Insert request (ID) into the user's PrayRequests
-			db.collection('users').update({
-				_id: records[0].author
-			}, {
-				$push: {
-					PrayRequests: records[0]._id
-				}
-			}, function(err, record) {
-				if (!err)
-					res.json(records[0]);
-				else
-					res.send(404);
-			});
-
+		//Insert request (ID) into the user's PrayRequests
+		request.db.collection('users').update({
+			_id: records[0].author
+		}, {
+			$push: {
+				PrayRequests: records[0]._id
+			}
+		}, function(err, record) {
+			if (!err)
+				res.json(records[0]);
+			else
+				res.send(404);
 		});
+
 	});
 };
+
 
 
 module.exports.newPrays = function(request, res) {
@@ -99,33 +95,29 @@ module.exports.newPrays = function(request, res) {
 		return;
 	}
 	var userid = utils.sanitizedUserID(decoded.userid);
-	
+
 	console.log(userid);
-	mongodb.connect(function(err, db) {
-		if(err){res.send(404);
-			return;
-		}
-		
-		//Find the Pray, and update the fields(SharedWith   and 	SharedWithLenght)
-		db.collection('pray_requests').findOne({
-				//acha pedidos que não são do usuário e que não foram pegos por ele ainda
-				Author: {
-					$ne: userid
-				},
-				SharedWith: {
-					$nin: [userid]
-				}
+	//Find the Pray, and update the fields(SharedWith   and 	SharedWithLenght)
+	request.db.collection('pray_requests').findOne({
+			//acha pedidos que não são do usuário e que não foram pegos por ele ainda
+			Author: {
+				$ne: userid
 			},
-			function(err, record) {
-				//se não conseguiu achar, retorna 404.
-				if (err || !record) {
-					res.send(404);
-					return;
-				}
-				res.json(record);
-			});
+			SharedWith: {
+				$nin: [userid]
+			}
+		},
+		function(err, record) {
+			//se não conseguiu achar, retorna 404.
+			if (err || !record) {
+				res.send(404);
+				return;
+			}
+			res.json(record);
 		});
+
 }
+
 
 /**
  *	@api {get} /getprayrequest/ Pegar pedido de oração
@@ -150,67 +142,66 @@ module.exports.getRandomPray = function(request, res) {
 	var userid = utils.sanitizedUserID(decoded.userid);
 	var gotDate = {};
 	gotDate[userid] = new Date();
-	mongodb.connect(function(err, db) {
-		//Find the Pray, and update the fields(SharedWith   and 	SharedWithLenght)
-		db.collection('pray_requests').findAndModify({
-				//acha pedidos que não são do usuário e que não foram pegos por ele ainda
-				Author: {
-					$ne: userid
-				},
-				SharedWith: {
-					$nin: [userid]
-				}
-			}, [
-				["SharedWithLength", "asc"],
-				["CreationDate", "asc"]
-			], {
+	//Find the Pray, and update the fields(SharedWith   and 	SharedWithLenght)
+	request.db.collection('pray_requests').findAndModify({
+			//acha pedidos que não são do usuário e que não foram pegos por ele ainda
+			Author: {
+				$ne: userid
+			},
+			SharedWith: {
+				$nin: [userid]
+			}
+		}, [
+			["SharedWithLength", "asc"],
+			["CreationDate", "asc"]
+		], {
+			$push: {
+				SharedWith: userid,
+				GotDate: gotDate
+			},
+			$inc: {
+				SharedWithLength: 1
+			}
+		},
+		//Seta para já vir o documento atualizado
+		{
+			"new": true
+		},
+		function(err, record) {
+			//se não conseguiu achar, retorna 404.
+			if (err || !record) {
+				res.send(404);
+				return;
+			}
+
+			console.log("Versículo " + record);
+
+			//Insert Pray (ID) into the user's pray pocket
+			request.db.collection('users').update({
+				_id: record.Author
+			}, {
 				$push: {
-					SharedWith: userid,
-					GotDate: gotDate
-				},
-				$inc: {
-					SharedWithLength: 1
+					PrayRequests: record._id
 				}
-			},
-			//Seta para já vir o documento atualizado
-			{
-				"new": true
-			},
-			function(err, record) {
-				//se não conseguiu achar, retorna 404.
-				if (err || !record) {
-					res.send(404);
-					return;
-				}
-
-				console.log("Versículo " + record);
-
-				//Insert Pray (ID) into the user's pray pocket
-				db.collection('users').update({
-					_id: record.Author
-				}, {
-					$push: {
-						PrayRequests: record._id
-					}
-				}, function(err, records) {
-					res.json(record);
-				});
-
-				var notification = {};
-				notification[record._id] = userid;
-				apn.sendNotificationForUser(notification, record.Author);
-
-				//Insert pray notification for author
-				// db.collection('notifications').update({
-				// 	"userid": record.Author
-				// }, {
-				// 	$push: {
-				// 		PrayRequests: notification
-				// 	}
-				// },{ upsert: true }, function(err, records) {
-				// });
-
+			}, function(err, records) {
+				res.json(record);
 			});
-	});
+
+			var notification = {};
+			notification[record._id] = userid;
+			apn.sendNotificationForUser(request.db, notification, record.Author);
+
+			//Insert pray notification for author
+			// db.collection('notifications').update({
+			// 	"userid": record.Author
+			// }, {
+			// 	$push: {
+			// 		PrayRequests: notification
+			// 	}
+			// },{ upsert: true }, function(err, records) {
+			// });
+
+		});
 
 }
+
