@@ -2,7 +2,7 @@ require('./config.js');
 var apn = require('apn');
 var ObjectID = require('mongodb').ObjectID;
 var utils = require('./utils.js');
-
+var mongodb = require('./mongo_db.js');
 
 var options = {
 	"production": false
