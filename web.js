@@ -180,10 +180,6 @@ io.sockets.on('connection', function(socket) {
 					console.log("Username: " + s.username + "na sala: " + actual_room);
 				}
 			});
-			userIds.push({
-				"userId": socket.username,
-				"online": "no"
-			});
 			redis_client.lrange(actual_room, 0, -1, function(error, items) {
 				if (error)
 					console.log("deu erro na hora de pegar a lista no redis");
