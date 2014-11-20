@@ -161,34 +161,35 @@ io.sockets.on('connection', function(socket) {
 		console.log("Salas do client:" + JSON.stringify(currentClientRooms, null, 4) + JSON.stringify(io.sockets.manager.roomClients, null, 4));
 		for (var current_room in currentClientRooms) {
 			var actual_room = current_room.substring(1);
-			console.log("sala que houve um disconnect: " + actual_room);
-			redis_client.rpush(actual_room, socket.username, function(err, count) {
-				if (err) {
-					console.log("Deu erro na hora de salvar!");
-				}
-			});
-			var userIds = [];
-			io.sockets.clients(actual_room).forEach(function(s) {
-				if (s.username && s.username != socket.username) {
-					userIds.push({
-						"userId": s.username,
-						"online": "yes"
-					});
-					console.log("Username: " + s.username + "na sala: " + actual_room);
-				}
-			});
-			redis_client.lrange(actual_room, 0, -1, function(error, items) {
-				if (error)
-					console.log("deu erro na hora de pegar a lista no redis");
-				items.forEach(function(offline_user) {
-					userIds.push({
-						"userId": offline_user,
-						"online": "no"
-					});
+			if(actual_room && actual_room != ""){
+				console.log("sala que houve um disconnect: " + actual_room);
+				redis_client.rpush(actual_room, socket.username, function(err, count) {
+					if (err) {
+						console.log("Deu erro na hora de salvar!");
+					}
 				});
-				io.sockets.to(actual_room).emit('updateusers', actual_room, userIds);			
-			});
-			
+				var userIds = [];
+				io.sockets.clients(actual_room).forEach(function(s) {
+					if (s.username && s.username != socket.username) {
+						userIds.push({
+							"userId": s.username,
+							"online": "yes"
+						});
+						console.log("Username: " + s.username + "na sala: " + actual_room);
+					}
+				});
+				redis_client.lrange(actual_room, 0, -1, function(error, items) {
+					if (error)
+						console.log("deu erro na hora de pegar a lista no redis");
+					items.forEach(function(offline_user) {
+						userIds.push({
+							"userId": offline_user,
+							"online": "no"
+						});
+					});
+					io.sockets.to(actual_room).emit('updateusers', actual_room, userIds);			
+				});
+			}			
 		}
 	});
 
@@ -198,35 +199,38 @@ io.sockets.on('connection', function(socket) {
 		console.log("Salas do client:" + JSON.stringify(currentClientRooms, null, 4) + JSON.stringify(io.sockets.manager.roomClients, null, 4));
 		for (var current_room in currentClientRooms) {
 			var actual_room = current_room.substring(1);
-			console.log("sala que houve um disconnect: " + actual_room);
-			redis_client.rpush(actual_room, socket.username, function(err, count) {
-				if (err) {
-					console.log("Deu erro na hora de salvar!");
-				}
-			});
-			var userIds = [];
-			io.sockets.clients(actual_room).forEach(function(s) {
-				if (s.username && s.username != socket.username) {
-					userIds.push({
-						"userId": s.username,
-						"online": "yes"
-					});
-					console.log("Username: " + s.username + "na sala: " + actual_room);
-				}
-			});
-			redis_client.lrange(actual_room, 0, -1, function(error, items) {
-				if (error)
-					console.log("deu erro na hora de pegar a lista no redis");
-				items.forEach(function(offline_user) {
-					userIds.push({
-						"userId": offline_user,
-						"online": "no"
-					});
+			if(actual_room && actual_room != ""){
+				console.log("sala que houve um disconnect: " + actual_room);
+				redis_client.rpush(actual_room, socket.username, function(err, count) {
+					if (err) {
+						console.log("Deu erro na hora de salvar!");
+					}
 				});
-				io.sockets.to(actual_room).emit('updateusers', actual_room, userIds);			
-			});
-			
-		}
+				var userIds = [];
+				io.sockets.clients(actual_room).forEach(function(s) {
+					if (s.username && s.username != socket.username) {
+						userIds.push({
+							"userId": s.username,
+							"online": "yes"
+						});
+						console.log("Username: " + s.username + "na sala: " + actual_room);
+					}
+				});
+				redis_client.lrange(actual_room, 0, -1, function(error, items) {
+					if (error)
+						console.log("deu erro na hora de pegar a lista no redis");
+					items.forEach(function(offline_user) {
+						console.log("user offline no redis: "+offline_user);
+						userIds.push({
+							"userId": offline_user,
+							"online": "no"
+						});
+					});
+					
+					io.sockets.to(actual_room).emit('updateusers', actual_room, userIds);			
+				});
+			}			
+		}	
 	});
 
 });
