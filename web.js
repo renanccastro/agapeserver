@@ -151,8 +151,8 @@ io.sockets.on('connection', function(socket) {
 					"online": "no"
 				});
 			});
+			io.sockets.to(room).emit('updateusers', room, userIds);
 		});
-		io.sockets.to(room).emit('updateusers', room, userIds);
 	});
 
 
@@ -193,9 +193,9 @@ io.sockets.on('connection', function(socket) {
 						"online": "no"
 					});
 				});
+				io.sockets.to(actual_room).emit('updateusers', actual_room, userIds);			
 			});
 			
-			io.sockets.to(actual_room).emit('updateusers', actual_room, userIds);
 		}
 	});
 
