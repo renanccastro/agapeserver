@@ -192,6 +192,11 @@ io.sockets.on('connection', function(socket) {
 			}			
 		}
 	});
+	socket.on('leaveroom', function(data){
+		var room = data.room;
+		socket.leave(room);
+		redis_client.lrem(room, 0, socket.username);
+	});
 
 	// when the user disconnects.. perform this
 	socket.on('disconnect', function() {
