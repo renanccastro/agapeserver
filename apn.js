@@ -5,7 +5,7 @@ var utils = require('./utils.js');
 var mongodb = require('./mongo_db.js');
 
 var options = {
-	"production": false
+	"production": true
 };
 
 var apnConnection = new apn.Connection(options);
