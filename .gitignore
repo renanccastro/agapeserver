@@ -1,6 +1,6 @@
 # certs
-cert.pem
-key.pem
+#cert.pem
+#key.pem
 
 # Logs
 logs
