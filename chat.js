@@ -18,10 +18,10 @@ module.exports.initializeChat = function(){
 	  console.error('There was an error with the redis client ' + err);
 	});
 	
-	  subscriber.auth(tokenSecret);
-	  publisher.auth(tokenSecret);
-	  client.auth(tokenSecret);
-
+	  // subscriber.auth(tokenSecret);
+	  // publisher.auth(tokenSecret);
+	  // client.auth(tokenSecret);
+	  
 	
 	
 	var returnedObject = {};
